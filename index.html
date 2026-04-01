@@ -145,11 +145,36 @@
 
             <section class="glass p-6 border border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.1)]">
                 <h3 class="text-[10px] text-green-400 font-bold mb-6 block uppercase border-b border-white/5 pb-2">Hipotecas (Vía QR)</h3>
-                <select id="select-propiedad" class="w-full bg-black/40 border-b border-green-500 p-3 text-xs outline-none font-mono text-white mb-6">
+                <select id="select-propiedad" class="w-full bg-black/40 border-b border-green-500 p-3 text-[10px] outline-none font-mono text-white mb-6">
                     <option value="0">Seleccionar Propiedad...</option>
                     <option value="30">Av. Mediterráneo ($30)</option>
                     <option value="30">Av. Báltica ($30)</option>
+                    <option value="50">Oriental ($50)</option>
+                    <option value="50">Vermont ($50)</option>
+                    <option value="60">Connecticut ($60)</option>
+                    <option value="70">San Carlos ($70)</option>
+                    <option value="70">Estados ($70)</option>
+                    <option value="80">Virginia ($80)</option>
+                    <option value="90">Santiago ($90)</option>
+                    <option value="90">Tennessee ($90)</option>
+                    <option value="100">Nueva York ($100)</option>
+                    <option value="110">Kentucky ($110)</option>
+                    <option value="110">Indiana ($110)</option>
+                    <option value="120">Illinois ($120)</option>
+                    <option value="130">Atlántico ($130)</option>
+                    <option value="130">Ventnor ($130)</option>
+                    <option value="140">Marvin Gardens ($140)</option>
+                    <option value="150">Pacífico ($150)</option>
+                    <option value="150">Carolina del Norte ($150)</option>
+                    <option value="160">Pensilvania ($160)</option>
+                    <option value="175">Park Place ($175)</option>
                     <option value="200">Boardwalk ($200)</option>
+                    <option value="100">Estación Reading ($100)</option>
+                    <option value="100">Estación Pensilvania ($100)</option>
+                    <option value="100">Estación B&O ($100)</option>
+                    <option value="100">Estación Short Line ($100)</option>
+                    <option value="75">Servicio Eléctrico ($75)</option>
+                    <option value="75">Servicio de Agua ($75)</option>
                 </select>
                 <div class="flex flex-col gap-3">
                     <button onclick="procesarHipoteca('hipotecar')" class="w-full bg-green-700/80 py-3 rounded-lg font-bold text-[9px] uppercase tracking-widest text-white hover:bg-green-600 transition">Hipotecar (Banco Paga)</button>
@@ -243,11 +268,14 @@
         let isAdminLoggedIn = false;
         let html5QrCode = null;
         
-        // CONTROLES ESTRICTOS PARA NFC (LECTURA Y ESCRITURA)
+        // CONTROLES ESTRICTOS PARA NFC
         let nfcAbortController = null;
         let nfcWriteAbortController = null;
         let isNfcReading = false;
         let isNfcWriting = false;
+        
+        // RELOJ ANTIRREBOTE (COOLDOWN) PARA EVITAR DOBLE COBRO
+        let lastNfcReadTime = 0; 
 
         // --- VALIDACIÓN ESTRICTA DE PERMISOS NFC ---
         async function verificarPermisoNFC() {
@@ -294,9 +322,12 @@
                 };
 
                 ndef.onreading = async ({ message }) => {
-                    // Candado de seguridad: Evita leer varias veces seguidas por accidente
-                    if (isNfcReading) return; 
+                    const now = Date.now();
+                    // Candado de 3 segundos estrictos para evitar que se cobre dos veces
+                    if (isNfcReading || (now - lastNfcReadTime < 3000)) return; 
+                    
                     isNfcReading = true;
+                    lastNfcReadTime = now;
                     
                     btn.innerText = "PROCESANDO...";
                     
@@ -309,9 +340,8 @@
                     const parts = tagData.split(':');
                     if(parts[0] !== 'MNPLY' || parts.length < 3) {
                         alert("❌ Tarjeta no compatible.");
-                        isNfcReading = false; // Liberar candado
+                        isNfcReading = false; 
                         resetNFCButton(btn, statusLabel);
-                        nfcAbortController.abort(); 
                         return;
                     }
 
@@ -321,9 +351,8 @@
                     if(accion === 'VACIO' || monto === 0) {
                         alert("❌ ESTA TARJETA NO TIENE SALDO. Debe ser recargada.");
                         playSound();
-                        isNfcReading = false; // Liberar candado
+                        isNfcReading = false; 
                         resetNFCButton(btn, statusLabel);
-                        nfcAbortController.abort(); 
                         return;
                     }
 
@@ -344,9 +373,8 @@
                     else if (accion === 'COBRO') {
                         if (monto > saldoJugador) {
                             alert(`❌ SALDO INSUFICIENTE. Necesitas $${monto} para pagar esto.`);
-                            isNfcReading = false; // Liberar candado
+                            isNfcReading = false; 
                             resetNFCButton(btn, statusLabel);
-                            nfcAbortController.abort(); 
                             return; 
                         }
                         saldoJugador -= monto;
@@ -357,23 +385,23 @@
 
                     if (procesado) {
                         btn.innerText = "NO MUEVAS LA TARJETA... VACIANDO";
-                        // Temporizador de 1.5s: Si el jugador quita la tarjeta muy rápido, aborta la escritura para no frizarse
-                        const writeTimeout = new AbortController();
-                        const id = setTimeout(() => writeTimeout.abort(), 1500);
                         try { 
-                            await ndef.write("MNPLY:VACIO:0", { signal: writeTimeout.signal }); 
+                            // Solo le damos 1.5 segundos para vaciar, si falla no traba el juego
+                            const timeout = new AbortController();
+                            const id = setTimeout(() => timeout.abort(), 1500);
+                            await ndef.write("MNPLY:VACIO:0", { signal: timeout.signal }); 
                             clearTimeout(id);
                         } catch (e) {
-                            console.warn("No se pudo vaciar la tarjeta", e);
+                            console.log("No se pudo vaciar la tarjeta (probablemente se retiró rápido).");
                         }
                     }
                     
                     playSound();
                     saveToCache();
                     actualizarUI();
-                    isNfcReading = false; // Liberar candado
+                    isNfcReading = false;
                     resetNFCButton(btn, statusLabel);
-                    nfcAbortController.abort();
+                    if(nfcAbortController) nfcAbortController.abort(); // Detener escáner al terminar
                 };
 
             } catch (error) {
@@ -406,8 +434,12 @@
                 };
 
                 ndef.onreading = async ({ message }) => {
-                    if (isNfcReading) return;
+                    const now = Date.now();
+                    // Candado estricto de 3 segundos
+                    if (isNfcReading || (now - lastNfcReadTime < 3000)) return; 
+                    
                     isNfcReading = true;
+                    lastNfcReadTime = now;
 
                     btn.innerText = "PROCESANDO AL BANCO...";
 
@@ -422,7 +454,6 @@
                         alert("❌ Tarjeta no compatible.");
                         isNfcReading = false;
                         resetNFCButtonBanco(btn);
-                        nfcAbortController.abort();
                         return;
                     }
 
@@ -434,7 +465,6 @@
                         playSound();
                         isNfcReading = false;
                         resetNFCButtonBanco(btn);
-                        nfcAbortController.abort();
                         return;
                     }
 
@@ -444,7 +474,6 @@
                         alert("⚠️ Esta tarjeta fue recargada por el banco. Entrégala a un jugador.");
                         isNfcReading = false;
                         resetNFCButtonBanco(btn);
-                        nfcAbortController.abort();
                         return;
                     }
                     else if (accion === 'PAGO') {
@@ -458,7 +487,6 @@
                             alert(`❌ SALDO DEL BANCO INSUFICIENTE.`);
                             isNfcReading = false;
                             resetNFCButtonBanco(btn);
-                            nfcAbortController.abort();
                             return;
                         }
                         saldoBanco -= monto;
@@ -469,13 +497,13 @@
 
                     if (procesado) {
                         btn.innerText = "NO MUEVAS LA TARJETA... VACIANDO";
-                        const writeTimeout = new AbortController();
-                        const id = setTimeout(() => writeTimeout.abort(), 1500);
                         try { 
-                            await ndef.write("MNPLY:VACIO:0", { signal: writeTimeout.signal }); 
+                            const timeout = new AbortController();
+                            const id = setTimeout(() => timeout.abort(), 1500);
+                            await ndef.write("MNPLY:VACIO:0", { signal: timeout.signal }); 
                             clearTimeout(id);
                         } catch (e) {
-                            console.warn("No se pudo vaciar la tarjeta", e);
+                            console.log("No se pudo vaciar la tarjeta.");
                         }
                     }
 
@@ -484,7 +512,7 @@
                     actualizarUI();
                     isNfcReading = false;
                     resetNFCButtonBanco(btn);
-                    nfcAbortController.abort();
+                    if(nfcAbortController) nfcAbortController.abort(); // Detener escáner
                 };
 
             } catch (error) {
@@ -535,7 +563,7 @@
                 return true;
             } catch (error) {
                 if (error.name !== "AbortError") {
-                    alert("❌ Fallo al escribir la tarjeta: " + error.message);
+                    alert("❌ Fallo al escribir la tarjeta: Acérquela correctamente y no la mueva rápido.");
                 }
                 uiButton.innerText = textoOriginal;
                 uiButton.classList.remove('nfc-scanning');
