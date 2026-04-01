@@ -87,7 +87,7 @@
                     <input id="monto-pago-jugador" type="number" placeholder="Monto" class="w-full bg-transparent border-b border-purple-500 p-2 text-xl text-center outline-none mb-3 font-mono text-white">
                     <div class="flex gap-2">
                         <button onclick="abrirCamara('jugador')" class="flex-1 bg-white/10 py-3 rounded-lg font-bold text-[9px] uppercase">Cámara</button>
-                        <button onclick="procesarTransaccion('pago', 'jugador')" class="flex-1 bg-purple-600 py-3 rounded-lg font-bold text-[9px] uppercase text-white">Pagar</button>
+                        <button onclick="generarQR('pago', 'jugador')" class="flex-1 bg-purple-600 py-3 rounded-lg font-bold text-[9px] uppercase text-white">Pagar (QR)</button>
                     </div>
                 </div>
             </div>
@@ -323,7 +323,7 @@
 
                 ndef.onreading = async ({ message }) => {
                     const now = Date.now();
-                    // Candado de 3 segundos estrictos para evitar que se cobre dos veces
+                    // Candado de 3 segundos estrictos
                     if (isNfcReading || (now - lastNfcReadTime < 3000)) return; 
                     
                     isNfcReading = true;
@@ -357,17 +357,19 @@
                     }
 
                     let procesado = false;
+                    let mensajeExito = "";
 
+                    // LÓGICA DE TRANSACCIÓN
                     if(accion === 'RECARGA') {
                         saldoJugador += monto;
                         logJugador.push({ tipo: 'cobro', monto: monto, desc: 'Recarga Banco (Sticker)', date: new Date().toLocaleTimeString() });
-                        alert(`✅ Has cobrado $${monto} del Banco.`);
+                        mensajeExito = `✅ Has cobrado $${monto} del Banco.`;
                         procesado = true;
                     } 
                     else if (accion === 'PAGO') {
                         saldoJugador += monto;
                         logJugador.push({ tipo: 'cobro', monto: monto, desc: 'Ingreso Tarjeta Jugador', date: new Date().toLocaleTimeString() });
-                        alert(`✅ Has recibido $${monto} de la tarjeta de otro jugador.`);
+                        mensajeExito = `✅ Has recibido $${monto} de la tarjeta de otro jugador.`;
                         procesado = true;
                     } 
                     else if (accion === 'COBRO') {
@@ -379,20 +381,20 @@
                         }
                         saldoJugador -= monto;
                         logJugador.push({ tipo: 'pago', monto: monto, desc: 'Pago Tarjeta Jugador', date: new Date().toLocaleTimeString() });
-                        alert(`✅ Has pagado $${monto} automáticamente.`);
+                        mensajeExito = `✅ Has pagado $${monto} automáticamente.`;
                         procesado = true;
                     }
 
+                    // VACIAR LA TARJETA ANTES DE MOSTRAR LA ALERTA PARA EVITAR BUGS
                     if (procesado) {
                         btn.innerText = "NO MUEVAS LA TARJETA... VACIANDO";
                         try { 
-                            // Solo le damos 1.5 segundos para vaciar, si falla no traba el juego
                             const timeout = new AbortController();
                             const id = setTimeout(() => timeout.abort(), 1500);
                             await ndef.write("MNPLY:VACIO:0", { signal: timeout.signal }); 
                             clearTimeout(id);
                         } catch (e) {
-                            console.log("No se pudo vaciar la tarjeta (probablemente se retiró rápido).");
+                            console.log("No se pudo vaciar la tarjeta (se retiró muy rápido).");
                         }
                     }
                     
@@ -401,7 +403,12 @@
                     actualizarUI();
                     isNfcReading = false;
                     resetNFCButton(btn, statusLabel);
-                    if(nfcAbortController) nfcAbortController.abort(); // Detener escáner al terminar
+                    if(nfcAbortController) nfcAbortController.abort(); // Detener escáner
+
+                    // MOSTRAR ALERTA DESPUÉS DE HABER ESCRITO
+                    if (mensajeExito) {
+                        alert(mensajeExito);
+                    }
                 };
 
             } catch (error) {
@@ -435,7 +442,7 @@
 
                 ndef.onreading = async ({ message }) => {
                     const now = Date.now();
-                    // Candado estricto de 3 segundos
+                    // Candado de 3 segundos
                     if (isNfcReading || (now - lastNfcReadTime < 3000)) return; 
                     
                     isNfcReading = true;
@@ -469,6 +476,7 @@
                     }
 
                     let procesado = false;
+                    let mensajeExito = "";
 
                     if(accion === 'RECARGA') {
                         alert("⚠️ Esta tarjeta fue recargada por el banco. Entrégala a un jugador.");
@@ -479,7 +487,7 @@
                     else if (accion === 'PAGO') {
                         saldoBanco += monto;
                         logBanco.push({ tipo: 'cobro', monto: monto, desc: 'Cobro a Tarjeta Jugador', date: new Date().toLocaleTimeString() });
-                        alert(`✅ El Banco ha cobrado $${monto} exitosamente.`);
+                        mensajeExito = `✅ El Banco ha cobrado $${monto} exitosamente.`;
                         procesado = true;
                     }
                     else if (accion === 'COBRO') {
@@ -491,10 +499,11 @@
                         }
                         saldoBanco -= monto;
                         logBanco.push({ tipo: 'pago', monto: monto, desc: 'Pago de Banco a Jugador', date: new Date().toLocaleTimeString() });
-                        alert(`✅ El Banco ha pagado $${monto} a la tarjeta.`);
+                        mensajeExito = `✅ El Banco ha pagado $${monto} a la tarjeta.`;
                         procesado = true;
                     }
 
+                    // VACIAR LA TARJETA ANTES DE MOSTRAR LA ALERTA
                     if (procesado) {
                         btn.innerText = "NO MUEVAS LA TARJETA... VACIANDO";
                         try { 
@@ -513,6 +522,10 @@
                     isNfcReading = false;
                     resetNFCButtonBanco(btn);
                     if(nfcAbortController) nfcAbortController.abort(); // Detener escáner
+
+                    if (mensajeExito) {
+                        alert(mensajeExito);
+                    }
                 };
 
             } catch (error) {
@@ -553,6 +566,7 @@
 
                 await ndef.write(datosString, { signal: nfcWriteAbortController.signal });
                 
+                // NOTA: Para escribir no hay riesgo de lectura doble, así que la alerta después está bien.
                 alert(`✅ ${successMsg}`);
                 
                 uiButton.innerText = textoOriginal;
