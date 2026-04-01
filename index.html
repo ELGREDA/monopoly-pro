@@ -294,6 +294,7 @@
                 };
 
                 ndef.onreading = async ({ message }) => {
+                    // Candado de seguridad: Evita leer varias veces seguidas por accidente
                     if (isNfcReading) return; 
                     isNfcReading = true;
                     
@@ -308,6 +309,7 @@
                     const parts = tagData.split(':');
                     if(parts[0] !== 'MNPLY' || parts.length < 3) {
                         alert("❌ Tarjeta no compatible.");
+                        isNfcReading = false; // Liberar candado
                         resetNFCButton(btn, statusLabel);
                         nfcAbortController.abort(); 
                         return;
@@ -319,6 +321,7 @@
                     if(accion === 'VACIO' || monto === 0) {
                         alert("❌ ESTA TARJETA NO TIENE SALDO. Debe ser recargada.");
                         playSound();
+                        isNfcReading = false; // Liberar candado
                         resetNFCButton(btn, statusLabel);
                         nfcAbortController.abort(); 
                         return;
@@ -341,6 +344,7 @@
                     else if (accion === 'COBRO') {
                         if (monto > saldoJugador) {
                             alert(`❌ SALDO INSUFICIENTE. Necesitas $${monto} para pagar esto.`);
+                            isNfcReading = false; // Liberar candado
                             resetNFCButton(btn, statusLabel);
                             nfcAbortController.abort(); 
                             return; 
@@ -352,12 +356,22 @@
                     }
 
                     if (procesado) {
-                        try { await ndef.write("MNPLY:VACIO:0"); } catch (e) {}
+                        btn.innerText = "NO MUEVAS LA TARJETA... VACIANDO";
+                        // Temporizador de 1.5s: Si el jugador quita la tarjeta muy rápido, aborta la escritura para no frizarse
+                        const writeTimeout = new AbortController();
+                        const id = setTimeout(() => writeTimeout.abort(), 1500);
+                        try { 
+                            await ndef.write("MNPLY:VACIO:0", { signal: writeTimeout.signal }); 
+                            clearTimeout(id);
+                        } catch (e) {
+                            console.warn("No se pudo vaciar la tarjeta", e);
+                        }
                     }
                     
                     playSound();
                     saveToCache();
                     actualizarUI();
+                    isNfcReading = false; // Liberar candado
                     resetNFCButton(btn, statusLabel);
                     nfcAbortController.abort();
                 };
@@ -366,11 +380,12 @@
                 if (error.name !== "AbortError") {
                     alert("❌ Permiso cancelado o bloqueado.");
                 }
+                isNfcReading = false;
                 resetNFCButton(btn, statusLabel);
             }
         }
 
-        // --- PROTOCOLO DE LECTURA NFC PARA EL BANCO (NUEVO) ---
+        // --- PROTOCOLO DE LECTURA NFC PARA EL BANCO ---
         async function leerNFCBanco() {
             const btn = document.getElementById('btn-nfc-read-banco');
             if (!(await verificarPermisoNFC())) return;
@@ -405,6 +420,7 @@
                     const parts = tagData.split(':');
                     if(parts[0] !== 'MNPLY' || parts.length < 3) {
                         alert("❌ Tarjeta no compatible.");
+                        isNfcReading = false;
                         resetNFCButtonBanco(btn);
                         nfcAbortController.abort();
                         return;
@@ -416,6 +432,7 @@
                     if(accion === 'VACIO' || monto === 0) {
                         alert("❌ ESTA TARJETA NO TIENE SALDO.");
                         playSound();
+                        isNfcReading = false;
                         resetNFCButtonBanco(btn);
                         nfcAbortController.abort();
                         return;
@@ -425,6 +442,7 @@
 
                     if(accion === 'RECARGA') {
                         alert("⚠️ Esta tarjeta fue recargada por el banco. Entrégala a un jugador.");
+                        isNfcReading = false;
                         resetNFCButtonBanco(btn);
                         nfcAbortController.abort();
                         return;
@@ -438,6 +456,7 @@
                     else if (accion === 'COBRO') {
                         if (monto > saldoBanco) {
                             alert(`❌ SALDO DEL BANCO INSUFICIENTE.`);
+                            isNfcReading = false;
                             resetNFCButtonBanco(btn);
                             nfcAbortController.abort();
                             return;
@@ -449,12 +468,21 @@
                     }
 
                     if (procesado) {
-                        try { await ndef.write("MNPLY:VACIO:0"); } catch (e) {}
+                        btn.innerText = "NO MUEVAS LA TARJETA... VACIANDO";
+                        const writeTimeout = new AbortController();
+                        const id = setTimeout(() => writeTimeout.abort(), 1500);
+                        try { 
+                            await ndef.write("MNPLY:VACIO:0", { signal: writeTimeout.signal }); 
+                            clearTimeout(id);
+                        } catch (e) {
+                            console.warn("No se pudo vaciar la tarjeta", e);
+                        }
                     }
 
                     playSound();
                     saveToCache();
                     actualizarUI();
+                    isNfcReading = false;
                     resetNFCButtonBanco(btn);
                     nfcAbortController.abort();
                 };
@@ -463,6 +491,7 @@
                 if (error.name !== "AbortError") {
                     alert("❌ Permiso cancelado o bloqueado.");
                 }
+                isNfcReading = false;
                 resetNFCButtonBanco(btn);
             }
         }
@@ -483,7 +512,6 @@
         async function escribirNFCData(datosString, uiButton, textoOriginal, successMsg) {
             if (!(await verificarPermisoNFC())) return false;
             
-            // CANDADO: Evitar múltiples clicks
             if (isNfcWriting) return false;
             if (nfcWriteAbortController) nfcWriteAbortController.abort();
             
@@ -495,7 +523,6 @@
                 uiButton.innerText = "ACERCA LA TARJETA AHORA...";
                 uiButton.classList.add('nfc-scanning');
 
-                // Aplicar el controlador de apagado también a la escritura
                 await ndef.write(datosString, { signal: nfcWriteAbortController.signal });
                 
                 alert(`✅ ${successMsg}`);
