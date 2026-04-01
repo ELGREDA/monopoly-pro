@@ -28,12 +28,30 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         
-        /* Animación de carga para NFC */
+        /* Animación NFC */
         .nfc-scanning { animation: pulse-blue 1.5s infinite; }
         @keyframes pulse-blue {
             0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
             70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
             100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+
+        /* Diseño Tarjeta de Crédito */
+        .credit-card {
+            background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(168, 85, 247, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .credit-card::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%);
+            transform: rotate(30deg);
+            pointer-events: none;
         }
     </style>
 </head>
@@ -56,10 +74,10 @@
         </h1>
     </header>
 
-    <main id="vista-jugador" class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <main id="vista-jugador" class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
         <section class="glass p-6 neon-cyan relative">
             <button onclick="confirmarReset('jugador')" class="absolute top-4 right-4 text-[8px] text-red-400 opacity-50 hover:opacity-100 uppercase tracking-widest font-bold">Reiniciar Wallet</button>
-            <h2 class="text-xs text-cyan-400 font-bold mb-6 tracking-widest uppercase">Operaciones</h2>
+            <h2 class="text-xs text-cyan-400 font-bold mb-6 tracking-widest uppercase">Operaciones (QR)</h2>
             <div class="space-y-6">
                 <div class="p-4 bg-white/5 rounded-xl">
                     <input id="monto-cobro-jugador" type="number" placeholder="Monto" class="w-full bg-transparent border-b border-cyan-500 p-2 text-xl text-center outline-none mb-3 font-mono text-white">
@@ -73,6 +91,10 @@
                     </div>
                 </div>
             </div>
+            
+            <button onclick="abrirTarjetaNFC()" class="w-full mt-6 bg-gradient-to-r from-purple-600 to-cyan-600 py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-purple-500/20 hover:scale-[1.02] transition-transform">
+                💳 USAR TARJETA DE CRÉDITO NFC
+            </button>
         </section>
 
         <section class="glass p-6 neon-purple flex flex-col">
@@ -83,7 +105,7 @@
                 </div>
             </div>
             <button id="btn-nfc-read" onclick="leerNFC()" class="w-full mb-6 bg-blue-600/20 border border-blue-500/50 p-4 rounded-xl text-blue-300 text-[10px] font-black tracking-widest transition-all">
-                SOLICITAR PERMISO Y LEER NFC
+                ESCANEAR TARJETA / STICKER NFC
             </button>
             <h3 class="text-[9px] font-bold text-gray-600 uppercase mb-3 tracking-widest border-b border-white/5 pb-2 italic">Registro de Turnos</h3>
             <div id="historial-jugador" class="space-y-2 overflow-y-auto max-h-[200px] custom-scrollbar text-white"></div>
@@ -105,7 +127,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <section class="glass p-6 neon-cyan">
-                <h3 class="text-[10px] text-cyan-400 font-bold mb-6 block uppercase border-b border-white/5 pb-2">Gestión de Caja</h3>
+                <h3 class="text-[10px] text-cyan-400 font-bold mb-6 block uppercase border-b border-white/5 pb-2">Gestión de Caja (QR)</h3>
                 <div class="space-y-4">
                     <input id="monto-cobro-banco" type="number" placeholder="Ingreso Banco" class="w-full bg-black/40 border-b border-cyan-500 p-3 text-lg outline-none font-mono text-white">
                     <button onclick="generarQR('cobro', 'banco')" class="w-full bg-cyan-700 py-3 rounded-lg font-bold text-[9px] tracking-widest">GENERAR QR COBRO</button>
@@ -127,32 +149,7 @@
                     <option value="0">Seleccionar Propiedad...</option>
                     <option value="30">Av. Mediterráneo ($30)</option>
                     <option value="30">Av. Báltica ($30)</option>
-                    <option value="50">Oriental ($50)</option>
-                    <option value="50">Vermont ($50)</option>
-                    <option value="60">Connecticut ($60)</option>
-                    <option value="70">San Carlos ($70)</option>
-                    <option value="70">Estados ($70)</option>
-                    <option value="80">Virginia ($80)</option>
-                    <option value="90">Santiago ($90)</option>
-                    <option value="90">Tennessee ($90)</option>
-                    <option value="100">Nueva York ($100)</option>
-                    <option value="110">Kentucky ($110)</option>
-                    <option value="110">Indiana ($110)</option>
-                    <option value="120">Illinois ($120)</option>
-                    <option value="130">Atlántico ($130)</option>
-                    <option value="130">Ventnor ($130)</option>
-                    <option value="140">Marvin Gardens ($140)</option>
-                    <option value="150">Pacífico ($150)</option>
-                    <option value="150">Carolina del Norte ($150)</option>
-                    <option value="160">Pensilvania ($160)</option>
-                    <option value="175">Park Place ($175)</option>
                     <option value="200">Boardwalk ($200)</option>
-                    <option value="100">Estación Reading ($100)</option>
-                    <option value="100">Estación Pensilvania ($100)</option>
-                    <option value="100">Estación B&O ($100)</option>
-                    <option value="100">Estación Short Line ($100)</option>
-                    <option value="75">Servicio Eléctrico ($75)</option>
-                    <option value="75">Servicio de Agua ($75)</option>
                 </select>
                 <div class="flex flex-col gap-3">
                     <button onclick="procesarHipoteca('hipotecar')" class="w-full bg-green-700/80 py-3 rounded-lg font-bold text-[9px] uppercase tracking-widest text-white hover:bg-green-600 transition">Hipotecar (Banco Paga)</button>
@@ -161,13 +158,57 @@
             </section>
 
             <section class="glass p-6 border border-yellow-500/20">
-                <h3 class="text-[10px] text-yellow-500 font-bold mb-6 block uppercase border-b border-white/5 pb-2 italic">Laboratorio NFC</h3>
-                <input id="nfc-write-data" type="text" placeholder="Código de Tag (ej: SALIDA-200)" class="w-full bg-black/40 border border-yellow-500/30 p-3 text-sm outline-none rounded mb-4 text-white font-mono">
-                <button id="btn-nfc-write" onclick="escribirNFC()" class="w-full bg-yellow-600/80 py-4 rounded-xl font-bold text-[10px] tracking-widest mb-6 shadow-inner">PROGRAMAR STICKER</button>
+                <h3 class="text-[10px] text-yellow-500 font-bold mb-6 block uppercase border-b border-white/5 pb-2 italic">Terminal NFC Banco</h3>
+                
+                <button id="btn-nfc-read-banco" onclick="leerNFCBanco()" class="w-full mb-6 bg-blue-600/20 border border-blue-500/50 p-4 rounded-xl text-blue-300 text-[10px] font-black tracking-widest transition-all hover:bg-blue-600/40">
+                    ESCANEAR TARJETA JUGADOR
+                </button>
+
+                <hr class="border-yellow-500/20 my-4">
+
+                <p class="text-[8px] text-gray-400 mb-4">Carga saldo a un sticker. Se descontará del banco automáticamente.</p>
+                <input id="monto-nfc-banco" type="number" placeholder="Monto a recargar" class="w-full bg-black/40 border-b border-yellow-500/50 p-3 text-lg outline-none mb-4 text-white font-mono text-center">
+                <button id="btn-nfc-write" onclick="recargarStickerBanco()" class="w-full bg-yellow-600/80 py-4 rounded-xl font-bold text-[10px] tracking-widest mb-6 shadow-inner text-white hover:scale-[1.02] transition-transform">RECARGAR STICKER</button>
                 <div id="historial-banco" class="space-y-2 overflow-y-auto max-h-[150px] custom-scrollbar text-white"></div>
             </section>
         </div>
     </main>
+
+    <div id="modal-tarjeta-nfc" class="hidden fixed inset-0 bg-black/95 z-[90] flex flex-col items-center justify-center p-6 text-center">
+        <h2 class="text-cyan-400 text-sm font-bold tracking-[0.3em] mb-8 uppercase">Transacción NFC</h2>
+        
+        <div class="credit-card w-full max-w-sm rounded-2xl p-6 flex flex-col justify-between h-56 mb-8">
+            <div class="flex justify-between items-start">
+                <div class="text-left">
+                    <p class="text-[8px] text-gray-400 tracking-widest">MONOPOLY PRO</p>
+                    <p class="text-lg font-black text-white tracking-widest mt-1">BLACK CARD</p>
+                </div>
+                <div class="w-10 h-8 bg-gradient-to-br from-yellow-300 to-yellow-600 rounded flex items-center justify-center overflow-hidden opacity-80">
+                    <div class="w-full h-[1px] bg-black/30 absolute"></div>
+                    <div class="w-[1px] h-full bg-black/30 absolute"></div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <p class="text-[9px] text-gray-400 tracking-widest mb-1 text-left">ESTABLECER MONTO EN TARJETA</p>
+                <div class="flex gap-2">
+                    <input id="input-nfc-pago" type="number" placeholder="PAGAR" class="w-1/2 bg-black/50 border border-purple-500/50 rounded-lg p-2 text-center text-white font-mono outline-none">
+                    <input id="input-nfc-cobro" type="number" placeholder="COBRAR" class="w-1/2 bg-black/50 border border-cyan-500/50 rounded-lg p-2 text-center text-white font-mono outline-none">
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-end mt-4">
+                <p class="text-[10px] text-gray-300 font-mono tracking-widest">**** **** **** 9021</p>
+                <svg class="w-6 h-6 text-white/50" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+            </div>
+        </div>
+
+        <div class="flex gap-4 w-full max-w-sm">
+            <button id="btn-escribir-tarjeta" onclick="procesarTarjetaJugador()" class="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 py-4 rounded-xl font-bold text-xs uppercase tracking-widest text-white">GRABAR TARJETA</button>
+            <button onclick="cerrarModal('modal-tarjeta-nfc')" class="px-6 bg-white/10 py-4 rounded-xl font-bold text-xs uppercase text-white">Cancelar</button>
+        </div>
+        <p id="tarjeta-status" class="text-[10px] text-gray-400 mt-4 tracking-widest h-4"></p>
+    </div>
 
     <div id="modal-qr" class="hidden fixed inset-0 bg-black/95 z-[60] flex flex-col items-center justify-center p-6 text-center">
         <div id="qrcode" class="bg-white p-4 rounded-3xl mb-6"></div>
@@ -194,123 +235,349 @@
     </div>
 
     <script>
-        // VARIABLES Y PERSISTENCIA
+        // VARIABLES Y PERSISTENCIA GLOBALES
         let saldoJugador = parseFloat(localStorage.getItem('saldoJugador')) || 0.00;
         let saldoBanco = parseFloat(localStorage.getItem('saldoBanco')) || 20580.00;
         let logJugador = JSON.parse(localStorage.getItem('logJugador')) || [];
         let logBanco = JSON.parse(localStorage.getItem('logBanco')) || [];
         let isAdminLoggedIn = false;
         let html5QrCode = null;
+        
+        // CONTROLES ESTRICTOS PARA NFC (LECTURA Y ESCRITURA)
+        let nfcAbortController = null;
+        let nfcWriteAbortController = null;
+        let isNfcReading = false;
+        let isNfcWriting = false;
 
         // --- VALIDACIÓN ESTRICTA DE PERMISOS NFC ---
         async function verificarPermisoNFC() {
-            // REGLA FUNDAMENTAL DE SEGURIDAD DEL NAVEGADOR
             if (!window.isSecureContext) {
-                alert("🛑 EL NAVEGADOR BLOQUEA EL NFC POR SEGURIDAD:\n\nPara que el navegador confíe en esta página y permita leer/escribir NFC, DEBE estar alojada en una dirección segura (HTTPS) o en 'localhost'.\n\nSi abriste esto como un archivo (file://) o en HTTP normal, el navegador asume que no es seguro y NUNCA ejecutará el NFC.");
+                alert("🛑 EL NAVEGADOR BLOQUEA EL NFC POR SEGURIDAD:\n\nPara usar NFC, esta página DEBE estar en GitHub Pages (HTTPS).");
                 return false;
             }
-
             if (!('NDEFReader' in window)) {
                 alert("⚠️ Tu navegador no soporta NFC. Asegúrate de usar Chrome en Android.");
                 return false;
             }
-
             try {
                 const permissionStatus = await navigator.permissions.query({ name: 'nfc' });
                 if (permissionStatus.state === 'denied') {
-                    alert("❌ ACCESO NFC DENEGADO PREVIAMENTE.\n\nPara usarlo, ve a los ajustes de tu navegador:\n1. Toca el candado en la barra de direcciones.\n2. Ve a Configuración de sitios.\n3. Activa 'NFC' y vuelve a intentar.");
+                    alert("❌ ACCESO NFC DENEGADO PREVIAMENTE. Actívalo en Configuración de Sitios de Chrome.");
                     return false;
                 }
                 return true;
-            } catch (error) {
-                return true; 
-            }
+            } catch (error) { return true; }
         }
 
-        // --- PROTOCOLO DE NFC MEJORADO ---
+        // --- PROTOCOLO DE LECTURA NFC PARA EL JUGADOR ---
         async function leerNFC() {
             const btn = document.getElementById('btn-nfc-read');
             const statusLabel = document.getElementById('nfc-status-label');
 
-            const puedeUsarNFC = await verificarPermisoNFC();
-            if (!puedeUsarNFC) return;
+            if (!(await verificarPermisoNFC())) return;
+
+            if (nfcAbortController) nfcAbortController.abort();
+            nfcAbortController = new AbortController();
+            isNfcReading = false; 
 
             try {
                 const ndef = new NDEFReader();
-                await ndef.scan();
+                await ndef.scan({ signal: nfcAbortController.signal });
                 
-                btn.innerText = "ACERCA EL TAG AHORA...";
+                btn.innerText = "ACERCA LA TARJETA / STICKER...";
                 btn.classList.add('nfc-scanning', 'bg-blue-600/40');
-                statusLabel.innerText = "NFC: ESCANEANDO...";
+                statusLabel.innerText = "NFC: LEYENDO...";
                 statusLabel.classList.add('text-blue-400');
 
-                ndef.onreadingerror = () => {
-                    alert("❌ Error de lectura: No se pudo leer el Tag. Intenta de nuevo.");
+                ndef.onreadingerror = () => { 
+                    if(!isNfcReading) alert("❌ Error al leer. Intenta de nuevo."); 
                 };
 
-                ndef.onreading = ({ message, serialNumber }) => {
-                    saldoJugador += 200;
-                    logJugador.push({ tipo: 'cobro', monto: 200, desc: 'Bono NFC (Salida)', date: new Date().toLocaleTimeString() });
+                ndef.onreading = async ({ message }) => {
+                    if (isNfcReading) return; 
+                    isNfcReading = true;
+                    
+                    btn.innerText = "PROCESANDO...";
+                    
+                    const decoder = new TextDecoder();
+                    let tagData = "";
+                    for (const record of message.records) {
+                        tagData = decoder.decode(record.data);
+                    }
+
+                    const parts = tagData.split(':');
+                    if(parts[0] !== 'MNPLY' || parts.length < 3) {
+                        alert("❌ Tarjeta no compatible.");
+                        resetNFCButton(btn, statusLabel);
+                        nfcAbortController.abort(); 
+                        return;
+                    }
+
+                    const accion = parts[1];
+                    const monto = parseFloat(parts[2]);
+
+                    if(accion === 'VACIO' || monto === 0) {
+                        alert("❌ ESTA TARJETA NO TIENE SALDO. Debe ser recargada.");
+                        playSound();
+                        resetNFCButton(btn, statusLabel);
+                        nfcAbortController.abort(); 
+                        return;
+                    }
+
+                    let procesado = false;
+
+                    if(accion === 'RECARGA') {
+                        saldoJugador += monto;
+                        logJugador.push({ tipo: 'cobro', monto: monto, desc: 'Recarga Banco (Sticker)', date: new Date().toLocaleTimeString() });
+                        alert(`✅ Has cobrado $${monto} del Banco.`);
+                        procesado = true;
+                    } 
+                    else if (accion === 'PAGO') {
+                        saldoJugador += monto;
+                        logJugador.push({ tipo: 'cobro', monto: monto, desc: 'Ingreso Tarjeta Jugador', date: new Date().toLocaleTimeString() });
+                        alert(`✅ Has recibido $${monto} de la tarjeta de otro jugador.`);
+                        procesado = true;
+                    } 
+                    else if (accion === 'COBRO') {
+                        if (monto > saldoJugador) {
+                            alert(`❌ SALDO INSUFICIENTE. Necesitas $${monto} para pagar esto.`);
+                            resetNFCButton(btn, statusLabel);
+                            nfcAbortController.abort(); 
+                            return; 
+                        }
+                        saldoJugador -= monto;
+                        logJugador.push({ tipo: 'pago', monto: monto, desc: 'Pago Tarjeta Jugador', date: new Date().toLocaleTimeString() });
+                        alert(`✅ Has pagado $${monto} automáticamente.`);
+                        procesado = true;
+                    }
+
+                    if (procesado) {
+                        try { await ndef.write("MNPLY:VACIO:0"); } catch (e) {}
+                    }
                     
                     playSound();
                     saveToCache();
                     actualizarUI();
-                    
-                    alert("✅ ¡Tag Detectado! Saldo actualizado.");
-                    
-                    btn.innerText = "SOLICITAR PERMISO Y LEER NFC";
-                    btn.classList.remove('nfc-scanning', 'bg-blue-600/40');
-                    statusLabel.innerText = "SISTEMA ONLINE";
-                    statusLabel.classList.remove('text-blue-400');
+                    resetNFCButton(btn, statusLabel);
+                    nfcAbortController.abort();
                 };
 
             } catch (error) {
-                if (error.name === "NotAllowedError") {
-                    alert("❌ Has rechazado el permiso NFC o el navegador bloqueó la solicitud.");
-                } else {
-                    alert("❌ Error NFC: " + error.message);
+                if (error.name !== "AbortError") {
+                    alert("❌ Permiso cancelado o bloqueado.");
                 }
-                console.error(error);
+                resetNFCButton(btn, statusLabel);
             }
         }
 
-        async function escribirNFC() {
-            const data = document.getElementById('nfc-write-data').value;
-            const btn = document.getElementById('btn-nfc-write');
+        // --- PROTOCOLO DE LECTURA NFC PARA EL BANCO (NUEVO) ---
+        async function leerNFCBanco() {
+            const btn = document.getElementById('btn-nfc-read-banco');
+            if (!(await verificarPermisoNFC())) return;
 
-            if (!data) return alert("Escribe un código primero.");
-            
-            const puedeUsarNFC = await verificarPermisoNFC();
-            if (!puedeUsarNFC) return;
+            if (nfcAbortController) nfcAbortController.abort();
+            nfcAbortController = new AbortController();
+            isNfcReading = false;
 
             try {
                 const ndef = new NDEFReader();
-                btn.innerText = "ESCRIBIENDO... ACERCA EL TAG";
-                btn.classList.add('nfc-scanning');
+                await ndef.scan({ signal: nfcAbortController.signal });
 
-                await ndef.write(data);
-                
-                alert("✅ Sticker programado correctamente: " + data);
-                logBanco.push({ tipo: 'cobro', monto: 0, desc: `NFC Programado: ${data}`, date: new Date().toLocaleTimeString() });
-                
-                btn.innerText = "PROGRAMAR STICKER";
-                btn.classList.remove('nfc-scanning');
-                document.getElementById('nfc-write-data').value = '';
-                saveToCache();
-                actualizarUI();
+                btn.innerText = "ACERCA LA TARJETA DEL JUGADOR...";
+                btn.classList.add('nfc-scanning', 'bg-blue-600/40');
+
+                ndef.onreadingerror = () => {
+                    if(!isNfcReading) alert("❌ Error al leer. Intenta de nuevo.");
+                };
+
+                ndef.onreading = async ({ message }) => {
+                    if (isNfcReading) return;
+                    isNfcReading = true;
+
+                    btn.innerText = "PROCESANDO AL BANCO...";
+
+                    const decoder = new TextDecoder();
+                    let tagData = "";
+                    for (const record of message.records) {
+                        tagData = decoder.decode(record.data);
+                    }
+
+                    const parts = tagData.split(':');
+                    if(parts[0] !== 'MNPLY' || parts.length < 3) {
+                        alert("❌ Tarjeta no compatible.");
+                        resetNFCButtonBanco(btn);
+                        nfcAbortController.abort();
+                        return;
+                    }
+
+                    const accion = parts[1];
+                    const monto = parseFloat(parts[2]);
+
+                    if(accion === 'VACIO' || monto === 0) {
+                        alert("❌ ESTA TARJETA NO TIENE SALDO.");
+                        playSound();
+                        resetNFCButtonBanco(btn);
+                        nfcAbortController.abort();
+                        return;
+                    }
+
+                    let procesado = false;
+
+                    if(accion === 'RECARGA') {
+                        alert("⚠️ Esta tarjeta fue recargada por el banco. Entrégala a un jugador.");
+                        resetNFCButtonBanco(btn);
+                        nfcAbortController.abort();
+                        return;
+                    }
+                    else if (accion === 'PAGO') {
+                        saldoBanco += monto;
+                        logBanco.push({ tipo: 'cobro', monto: monto, desc: 'Cobro a Tarjeta Jugador', date: new Date().toLocaleTimeString() });
+                        alert(`✅ El Banco ha cobrado $${monto} exitosamente.`);
+                        procesado = true;
+                    }
+                    else if (accion === 'COBRO') {
+                        if (monto > saldoBanco) {
+                            alert(`❌ SALDO DEL BANCO INSUFICIENTE.`);
+                            resetNFCButtonBanco(btn);
+                            nfcAbortController.abort();
+                            return;
+                        }
+                        saldoBanco -= monto;
+                        logBanco.push({ tipo: 'pago', monto: monto, desc: 'Pago de Banco a Jugador', date: new Date().toLocaleTimeString() });
+                        alert(`✅ El Banco ha pagado $${monto} a la tarjeta.`);
+                        procesado = true;
+                    }
+
+                    if (procesado) {
+                        try { await ndef.write("MNPLY:VACIO:0"); } catch (e) {}
+                    }
+
+                    playSound();
+                    saveToCache();
+                    actualizarUI();
+                    resetNFCButtonBanco(btn);
+                    nfcAbortController.abort();
+                };
 
             } catch (error) {
-                if (error.name === "NotAllowedError") {
-                    alert("❌ Permiso denegado para escribir NFC.");
-                } else {
-                    alert("❌ Fallo al escribir: " + error.message);
+                if (error.name !== "AbortError") {
+                    alert("❌ Permiso cancelado o bloqueado.");
                 }
-                btn.innerText = "PROGRAMAR STICKER";
-                btn.classList.remove('nfc-scanning');
+                resetNFCButtonBanco(btn);
             }
         }
 
-        // --- LÓGICA GENERAL ---
+        function resetNFCButton(btn, statusLabel) {
+            btn.innerText = "ESCANEAR TARJETA / STICKER NFC";
+            btn.classList.remove('nfc-scanning', 'bg-blue-600/40');
+            statusLabel.innerText = "SISTEMA ONLINE";
+            statusLabel.classList.remove('text-blue-400');
+        }
+
+        function resetNFCButtonBanco(btn) {
+            btn.innerText = "ESCANEAR TARJETA JUGADOR";
+            btn.classList.remove('nfc-scanning', 'bg-blue-600/40');
+        }
+
+        // --- FUNCIÓN MAESTRA SEGURA PARA ESCRIBIR EN NFC (CON CANDADO) ---
+        async function escribirNFCData(datosString, uiButton, textoOriginal, successMsg) {
+            if (!(await verificarPermisoNFC())) return false;
+            
+            // CANDADO: Evitar múltiples clicks
+            if (isNfcWriting) return false;
+            if (nfcWriteAbortController) nfcWriteAbortController.abort();
+            
+            nfcWriteAbortController = new AbortController();
+            isNfcWriting = true;
+
+            try {
+                const ndef = new NDEFReader();
+                uiButton.innerText = "ACERCA LA TARJETA AHORA...";
+                uiButton.classList.add('nfc-scanning');
+
+                // Aplicar el controlador de apagado también a la escritura
+                await ndef.write(datosString, { signal: nfcWriteAbortController.signal });
+                
+                alert(`✅ ${successMsg}`);
+                
+                uiButton.innerText = textoOriginal;
+                uiButton.classList.remove('nfc-scanning');
+                isNfcWriting = false;
+                saveToCache();
+                actualizarUI();
+                return true;
+            } catch (error) {
+                if (error.name !== "AbortError") {
+                    alert("❌ Fallo al escribir la tarjeta: " + error.message);
+                }
+                uiButton.innerText = textoOriginal;
+                uiButton.classList.remove('nfc-scanning');
+                isNfcWriting = false;
+                return false;
+            }
+        }
+
+        // --- RECARGA DEL BANCO ---
+        async function recargarStickerBanco() {
+            const monto = parseFloat(document.getElementById('monto-nfc-banco').value);
+            if(isNaN(monto) || monto <= 0) return alert("Ingrese un monto válido.");
+            
+            const btn = document.getElementById('btn-nfc-write');
+            const exito = await escribirNFCData(
+                `MNPLY:RECARGA:${monto}`, 
+                btn, 
+                "RECARGAR STICKER", 
+                `Sticker recargado con $${monto}`
+            );
+
+            if (exito) {
+                saldoBanco -= monto;
+                logBanco.push({ tipo: 'pago', monto: monto, desc: `Recarga NFC emitida`, date: new Date().toLocaleTimeString() });
+                document.getElementById('monto-nfc-banco').value = '';
+                saveToCache();
+                actualizarUI();
+            }
+        }
+
+        // --- LÓGICA TARJETA DE CRÉDITO JUGADOR ---
+        function abrirTarjetaNFC() {
+            document.getElementById('modal-tarjeta-nfc').classList.remove('hidden');
+            document.getElementById('input-nfc-pago').value = '';
+            document.getElementById('input-nfc-cobro').value = '';
+            document.getElementById('tarjeta-status').innerText = '';
+        }
+
+        async function procesarTarjetaJugador() {
+            const pago = parseFloat(document.getElementById('input-nfc-pago').value);
+            const cobro = parseFloat(document.getElementById('input-nfc-cobro').value);
+            const btn = document.getElementById('btn-escribir-tarjeta');
+            const status = document.getElementById('tarjeta-status');
+
+            if (!isNaN(pago) && pago > 0) {
+                if (pago > saldoJugador) return alert("Saldo insuficiente para grabar este pago.");
+                
+                status.innerText = "GRABANDO PAGO EN TARJETA...";
+                const exito = await escribirNFCData(`MNPLY:PAGO:${pago}`, btn, "GRABAR TARJETA", "Pago guardado en la tarjeta física.");
+                
+                if (exito) {
+                    saldoJugador -= pago;
+                    logJugador.push({ tipo: 'pago', monto: pago, desc: 'Dinero cargado a Tarjeta', date: new Date().toLocaleTimeString() });
+                    cerrarModal('modal-tarjeta-nfc');
+                    saveToCache(); actualizarUI();
+                }
+            } 
+            else if (!isNaN(cobro) && cobro > 0) {
+                status.innerText = "GRABANDO COBRO EN TARJETA...";
+                const exito = await escribirNFCData(`MNPLY:COBRO:${cobro}`, btn, "GRABAR TARJETA", "Requisición de cobro guardada.");
+                if (exito) {
+                    cerrarModal('modal-tarjeta-nfc');
+                }
+            } else {
+                alert("Ingresa un monto en Pagar o Cobrar.");
+            }
+        }
+
+        // --- LÓGICA GENERAL (QR y CÁMARA) ---
         function saveToCache() {
             localStorage.setItem('saldoJugador', saldoJugador);
             localStorage.setItem('saldoBanco', saldoBanco);
@@ -365,7 +632,7 @@
             if (entidad === 'jugador') {
                 if (tipo === 'pago' && monto > saldoJugador) return alert("SALDO INSUFICIENTE");
                 saldoJugador += (tipo === 'cobro' ? monto : -monto);
-                logJugador.push({ tipo, monto, desc: tipo === 'cobro' ? 'Ingreso Automático/Manual' : 'Pago Automático/Manual', date: new Date().toLocaleTimeString() });
+                logJugador.push({ tipo, monto, desc: tipo === 'cobro' ? 'Ingreso QR/Manual' : 'Pago QR/Manual', date: new Date().toLocaleTimeString() });
             } else {
                 saldoBanco += (tipo === 'cobro' ? monto : -monto);
                 logBanco.push({ tipo, monto, desc: tipo === 'cobro' ? 'Cobro Banco' : 'Pago Banco', date: new Date().toLocaleTimeString() });
@@ -395,7 +662,7 @@
             const valorHipoteca = parseFloat(select.value);
             
             if (isNaN(valorHipoteca) || valorHipoteca <= 0) {
-                return alert("Por favor, seleccione una propiedad válida de la lista.");
+                return alert("Seleccione una propiedad.");
             }
 
             if (accion === 'hipotecar') {
@@ -405,7 +672,7 @@
                 const valorDeshipoteca = valorHipoteca + (valorHipoteca * 0.10);
                 document.getElementById('monto-cobro-banco').value = valorDeshipoteca;
                 generarQR('cobro', 'banco');
-                alert(`Regla Monopoly: Se aplicó un 10% de interés para levantar la hipoteca. El jugador debe escanear para pagar $${valorDeshipoteca}`);
+                alert(`Regla Monopoly: 10% de interés. El jugador pagará $${valorDeshipoteca}`);
             }
         }
 
@@ -414,20 +681,15 @@
             generarQR('pago', 'banco');
         }
 
-        // --- CÁMARA CON PETICIÓN DE PERMISO EXPLÍCITA ---
         function abrirCamara(entidad) {
-            // Solicitar explícitamente permisos de cámara al navegador ANTES de abrir el UI
             Html5Qrcode.getCameras().then(devices => {
                 if (devices && devices.length) {
                     document.getElementById('modal-camara').classList.remove('hidden');
                     
-                    if (!html5QrCode) {
-                        html5QrCode = new Html5Qrcode("reader");
-                    }
+                    if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
                     html5QrCode.start(
-                        { facingMode: "environment" }, 
-                        { fps: 10, qrbox: 250 }, 
+                        { facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
                         (text) => {
                             const parts = text.split('-');
                             if (parts[0] === 'MNPLY' && parts.length === 3) {
@@ -439,33 +701,26 @@
                                     playSound();
 
                                     if (tipoQR === 'cobro') {
-                                        // Si el otro generó un COBRO, YO debo PAGAR
-                                        if (entidad === 'jugador' && monto > saldoJugador) {
-                                            alert("SALDO INSUFICIENTE PARA REALIZAR ESTE PAGO");
-                                            return;
-                                        }
+                                        if (entidad === 'jugador' && monto > saldoJugador) return alert("SALDO INSUFICIENTE");
                                         document.getElementById(`monto-pago-${entidad}`).value = monto;
                                         procesarTransaccion('pago', entidad);
-                                        alert(`TRANSACCIÓN EXITOSA: Has pagado $${monto} automáticamente.`);
-                                        
+                                        alert(`Pagaste $${monto} exitosamente.`);
                                     } else if (tipoQR === 'pago') {
-                                        // Si el otro generó un PAGO, YO debo COBRAR
                                         document.getElementById(`monto-cobro-${entidad}`).value = monto;
                                         procesarTransaccion('cobro', entidad);
-                                        alert(`TRANSACCIÓN EXITOSA: Has recibido $${monto} automáticamente.`);
+                                        alert(`Recibiste $${monto} exitosamente.`);
                                     }
                                 }
                             }
                         },
                         (errorMessage) => {}
-                    ).catch((err) => {
-                        console.error("Error iniciando cámara:", err);
-                        alert("No se pudo iniciar la cámara. Verifica los permisos del navegador.");
+                    ).catch(err => {
+                        alert("No se pudo iniciar la cámara.");
                         cerrarModal('modal-camara'); 
                     });
                 }
             }).catch(err => {
-                alert("❌ PERMISO DE CÁMARA DENEGADO. Debes permitir el acceso a la cámara en tu navegador para poder escanear.");
+                alert("❌ PERMISO DE CÁMARA DENEGADO.");
             });
         }
 
@@ -474,8 +729,7 @@
                 html5QrCode.stop().then(() => {
                     html5QrCode.clear();
                     document.getElementById('modal-camara').classList.add('hidden');
-                }).catch((err) => {
-                    console.warn("Forzando cierre de cámara.");
+                }).catch(err => {
                     document.getElementById('modal-camara').classList.add('hidden');
                 });
             } else {
@@ -484,7 +738,7 @@
         }
 
         function confirmarReset(entidad) {
-            if (confirm("¿Seguro que quieres reiniciar? Se borrarán los saldos y el historial.")) {
+            if (confirm("¿Seguro que quieres reiniciar? Se borrarán los saldos.")) {
                 if (entidad === 'jugador') { saldoJugador = 0; logJugador = []; }
                 else { saldoBanco = 20580; logBanco = []; }
                 saveToCache(); actualizarUI();
