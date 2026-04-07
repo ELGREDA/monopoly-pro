@@ -20,11 +20,9 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         
-        /* Animación NFC */
         .nfc-scanning { animation: pulse-blue 1.5s infinite; }
         @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); } }
 
-        /* Diseño Tarjeta de Crédito */
         .credit-card { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(168, 85, 247, 0.1); position: relative; overflow: hidden; }
         .credit-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%); transform: rotate(30deg); pointer-events: none; }
         
@@ -41,13 +39,11 @@
         
         <div class="glass p-8 max-w-sm w-full border-cyan-500/40 neon-cyan relative">
             <h2 class="text-sm font-bold text-cyan-400 mb-4 tracking-widest uppercase">Tu Perfil</h2>
-            
             <div class="avatar-large relative group" onclick="document.getElementById('input-foto').click()">
                 <img id="preview-foto" src="" class="w-full h-full object-cover hidden">
                 <span id="foto-placeholder" class="text-xs text-gray-400 text-center font-sans tracking-normal">TOCA PARA<br>FOTO</span>
             </div>
             <input type="file" id="input-foto" accept="image/*" class="hidden" onchange="procesarFoto(event)">
-
             <input id="input-nombre-jugador" type="text" placeholder="TU NOMBRE" class="w-full bg-black/50 border-b border-cyan-500 p-3 mb-6 text-white text-center uppercase outline-none font-mono mt-2">
             <button onclick="registrarJugador()" class="w-full bg-cyan-600 hover:bg-cyan-500 py-4 rounded-xl font-bold text-[10px] tracking-widest text-white shadow-lg shadow-cyan-500/20 transition-all">ENTRAR A LA PARTIDA</button>
         </div>
@@ -60,8 +56,8 @@
             <span id="mi-nombre-display" class="ml-4 text-[10px] text-cyan-400 font-bold uppercase hidden"></span>
         </div>
         <div class="flex gap-2">
-            <button onclick="cambiarVista('jugador')" class="text-[9px] bg-white/5 px-3 py-2 rounded font-bold uppercase border border-white/10">Jugador</button>
-            <button onclick="intentarAccesoBanco()" class="text-[9px] bg-yellow-600/20 text-yellow-500 border border-yellow-500/30 px-3 py-2 rounded font-bold uppercase">Banco</button>
+            <button onclick="cambiarVista('jugador')" class="text-[9px] bg-white/5 px-3 py-2 rounded font-bold uppercase border border-white/10 hover:bg-white/10">Jugador</button>
+            <button onclick="intentarAccesoBanco()" class="text-[9px] bg-yellow-600/20 text-yellow-500 border border-yellow-500/30 px-3 py-2 rounded font-bold uppercase hover:bg-yellow-600/40">Banco</button>
         </div>
     </nav>
 
@@ -71,57 +67,83 @@
         </h1>
     </header>
 
-    <main id="vista-jugador" class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 relative hidden">
-        <section class="glass p-6 neon-cyan relative">
-            <button onclick="confirmarReset('jugador')" class="absolute top-4 right-4 text-[8px] text-red-400 opacity-50 hover:opacity-100 uppercase tracking-widest font-bold">Limpiar Log</button>
-            <h2 class="text-xs text-cyan-400 font-bold mb-6 tracking-widest uppercase">Operaciones (QR)</h2>
+    <main id="vista-jugador" class="w-full max-w-5xl flex flex-col gap-6 relative hidden">
+        
+        <section class="glass p-6 neon-cyan relative flex flex-col items-center justify-center min-h-[160px] bg-gradient-to-b from-cyan-900/20 to-transparent">
+            <div class="absolute top-4 right-4 flex gap-3">
+                <button onclick="cerrarSesionJugador()" class="text-[8px] text-red-400 hover:text-red-300 uppercase tracking-widest font-bold transition">Cerrar Sesión</button>
+            </div>
             
-            <button onclick="cerrarSesionJugador()" class="w-full mb-6 bg-red-900/40 border border-red-500/50 py-3 rounded-xl text-red-300 text-[9px] font-black uppercase tracking-[0.2em] transition-all hover:bg-red-600/40">
-                🚪 Cerrar Sesión / Cambiar Jugador
-            </button>
+            <p class="text-cyan-400 text-[10px] uppercase tracking-[0.3em] mb-2 font-bold mt-4">Balance Personal</p>
+            <div class="text-6xl md:text-7xl font-mono font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+                $<span id="saldo-jugador">0.00</span>
+            </div>
+        </section>
 
-            <div class="space-y-6">
-                <div class="p-4 bg-white/5 rounded-xl border border-cyan-500/30">
-                    <p class="text-[8px] text-cyan-400 mb-2 uppercase tracking-widest">Alguien me pagará a mi</p>
-                    <input id="monto-cobro-jugador" type="number" placeholder="Monto a Cobrar" class="w-full bg-transparent border-b border-cyan-500 p-2 text-xl text-center outline-none mb-3 font-mono text-white">
-                    <button onclick="generarQR('cobro', 'jugador')" class="w-full bg-cyan-600 py-3 rounded-lg font-bold text-xs uppercase tracking-widest">Generar QR de Cobro</button>
-                </div>
-                <div class="p-4 bg-white/5 rounded-xl border border-purple-500/30">
-                    <p class="text-[8px] text-purple-400 mb-2 uppercase tracking-widest">Yo pagaré a alguien</p>
-                    <input id="monto-pago-jugador" type="number" placeholder="Monto a Pagar" class="w-full bg-transparent border-b border-purple-500 p-2 text-xl text-center outline-none mb-3 font-mono text-white">
-                    <div class="flex gap-2">
-                        <button onclick="abrirCamara('jugador')" class="flex-1 bg-white/10 py-3 rounded-lg font-bold text-[9px] uppercase">📷 Escanear QR</button>
-                        <button onclick="generarQR('pago', 'jugador')" class="flex-1 bg-purple-600 py-3 rounded-lg font-bold text-[9px] uppercase text-white">Generar QR de Pago</button>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <section class="glass p-6 border border-cyan-500/30 flex flex-col gap-4 shadow-[0_0_15px_rgba(6,182,212,0.05)]">
+                
+                <h3 class="text-[11px] text-cyan-400 font-bold uppercase tracking-widest border-b border-white/10 pb-2 mb-2 flex items-center gap-2">
+                    📱 Transferencias (QR)
+                </h3>
+                <button onclick="abrirCamara('jugador')" class="w-full bg-cyan-600/20 border border-cyan-500/50 hover:bg-cyan-600/40 py-4 rounded-xl font-bold text-[11px] uppercase tracking-widest text-cyan-100 transition-all flex justify-center items-center gap-2">
+                    📷 ESCANEAR QR (PAGAR / COBRAR)
+                </button>
+                <div class="grid grid-cols-2 gap-4 mt-2">
+                    <div class="bg-black/40 p-4 rounded-xl border border-red-500/20 flex flex-col justify-between">
+                        <p class="text-[9px] text-red-400 mb-3 uppercase tracking-widest text-center font-bold">Yo Pagaré</p>
+                        <input id="monto-pago-jugador" type="number" placeholder="$ Monto" class="w-full bg-transparent border-b border-red-500/50 p-2 text-xl text-center outline-none mb-4 font-mono text-white">
+                        <button onclick="generarQR('pago', 'jugador')" class="w-full bg-red-600/80 hover:bg-red-500 py-3 rounded-lg font-bold text-[9px] uppercase text-white transition-all shadow-lg">Crear QR Pago</button>
+                    </div>
+                    <div class="bg-black/40 p-4 rounded-xl border border-green-500/20 flex flex-col justify-between">
+                        <p class="text-[9px] text-green-400 mb-3 uppercase tracking-widest text-center font-bold">Yo Cobraré</p>
+                        <input id="monto-cobro-jugador" type="number" placeholder="$ Monto" class="w-full bg-transparent border-b border-green-500/50 p-2 text-xl text-center outline-none mb-4 font-mono text-white">
+                        <button onclick="generarQR('cobro', 'jugador')" class="w-full bg-green-600/80 hover:bg-green-500 py-3 rounded-lg font-bold text-[9px] uppercase text-white transition-all shadow-lg">Crear QR Cobro</button>
                     </div>
                 </div>
-            </div>
-            
-            <button onclick="abrirTarjetaNFC()" class="w-full mt-6 bg-gradient-to-r from-purple-600 to-cyan-600 py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-purple-500/20 hover:scale-[1.02] transition-transform">
-                💳 USAR TARJETA DE CRÉDITO NFC
-            </button>
-            <button onclick="pagarMultaNFC()" class="w-full mt-3 bg-gradient-to-r from-red-600 to-orange-600 py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-red-500/20 hover:scale-[1.02] transition-transform">
-                🚨 PAGAR MULTA AL POZO (NFC)
-            </button>
-        </section>
 
-        <section class="glass p-6 neon-purple flex flex-col">
-            <div class="text-center mb-6">
-                <p class="text-gray-500 text-[9px] uppercase tracking-widest mb-1 italic">Balance Personal</p>
-                <div class="text-5xl font-mono font-bold text-white tracking-tighter">
-                    $<span id="saldo-jugador">0.00</span>
+                <h3 class="text-[11px] text-cyan-400 font-bold uppercase tracking-widest border-b border-white/10 pb-2 mb-2 mt-4 flex items-center gap-2">
+                    ☁️ Transferencias Directas (Nube)
+                </h3>
+                <div class="bg-black/40 p-4 rounded-xl border border-blue-500/20 flex flex-col justify-between">
+                    <select id="select-jugador-nube" class="w-full bg-transparent border-b border-blue-500/50 p-2 text-xs outline-none mb-3 font-mono text-white uppercase">
+                        <option value="">Seleccionar Destino...</option>
+                    </select>
+                    <input id="monto-nube-jugador" type="number" placeholder="$ Monto a Transferir" class="w-full bg-transparent border-b border-blue-500/50 p-2 text-xl text-center outline-none mb-4 font-mono text-white">
+                    <div class="flex gap-2">
+                        <button onclick="transferirNube('pago', 'jugador')" class="flex-1 bg-red-600/80 hover:bg-red-500 py-3 rounded-lg font-bold text-[9px] uppercase text-white transition-all shadow-lg">PAGARLE</button>
+                        <button onclick="transferirNube('cobro', 'jugador')" class="flex-1 bg-green-600/80 hover:bg-green-500 py-3 rounded-lg font-bold text-[9px] uppercase text-white transition-all shadow-lg">COBRARLE</button>
+                    </div>
                 </div>
+
+            </section>
+
+            <div class="flex flex-col gap-6">
+                <section class="glass p-6 border border-purple-500/30 neon-purple shadow-[0_0_15px_rgba(168,85,247,0.1)]">
+                    <h3 class="text-[11px] text-purple-400 font-bold uppercase tracking-widest border-b border-white/10 pb-2 mb-4 flex items-center gap-2">
+                        💳 Dispositivos Físicos (NFC)
+                    </h3>
+                    <button id="btn-nfc-read" onclick="leerNFC()" class="w-full mb-4 bg-blue-600/20 border border-blue-500/50 p-4 rounded-xl text-blue-300 text-[10px] font-black tracking-widest transition-all hover:bg-blue-600/40 shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+                        ESCANEAR TARJETA / STICKER
+                    </button>
+                    <div class="flex gap-3">
+                        <button onclick="abrirTarjetaNFC()" class="flex-1 bg-gradient-to-r from-purple-600 to-cyan-600 py-3 rounded-xl font-bold text-[8px] md:text-[9px] uppercase tracking-widest text-white shadow-lg hover:scale-[1.02] transition-transform">
+                            Mi Tarjeta
+                        </button>
+                        <button onclick="pagarMultaNFC()" class="flex-1 bg-gradient-to-r from-red-600 to-orange-600 py-3 rounded-xl font-bold text-[8px] md:text-[9px] uppercase tracking-widest text-white shadow-lg hover:scale-[1.02] transition-transform">
+                            Pagar Multa
+                        </button>
+                    </div>
+                </section>
+
+                <section class="glass p-4 border border-yellow-500/20 flex-1 flex flex-col">
+                    <h3 class="text-[10px] font-bold text-yellow-400 uppercase mb-3 tracking-widest border-b border-white/5 pb-2">🏆 Ranking Global</h3>
+                    <div id="leaderboard-container" class="space-y-2 overflow-y-auto max-h-[160px] custom-scrollbar">
+                        <p class="text-[10px] text-gray-500 text-center py-4">Sincronizando jugadores...</p>
+                    </div>
+                </section>
             </div>
-            <button id="btn-nfc-read" onclick="leerNFC()" class="w-full mb-6 bg-blue-600/20 border border-blue-500/50 p-4 rounded-xl text-blue-300 text-[10px] font-black tracking-widest transition-all">
-                ESCANEAR TARJETA / STICKER NFC
-            </button>
-            
-            <div class="mt-2 bg-black/30 rounded-xl p-4 border border-white/5 flex-1">
-                <h3 class="text-[9px] font-bold text-purple-400 uppercase mb-3 tracking-widest border-b border-white/5 pb-2">🏆 Ranking Global</h3>
-                <div id="leaderboard-container" class="space-y-3 overflow-y-auto max-h-[180px] custom-scrollbar">
-                    <p class="text-[10px] text-gray-500 text-center py-4">Sincronizando jugadores...</p>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
 
     <main id="vista-banco" class="w-full max-w-5xl flex flex-col gap-6 hidden">
@@ -139,15 +161,29 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <section class="glass p-6 neon-cyan">
-                <h3 class="text-[10px] text-cyan-400 font-bold mb-6 block uppercase border-b border-white/5 pb-2">Gestión de Caja (QR)</h3>
-                <div class="space-y-4">
-                    <input id="monto-cobro-banco" type="number" placeholder="Ingresar al Banco" class="w-full bg-black/40 border-b border-cyan-500 p-3 text-lg outline-none font-mono text-white">
-                    <button onclick="generarQR('cobro', 'banco')" class="w-full bg-cyan-700 py-3 rounded-lg font-bold text-[9px] tracking-widest">GENERAR QR COBRO</button>
-                    <hr class="border-white/5 my-2">
-                    <input id="monto-pago-banco" type="number" placeholder="Pagar desde Banco" class="w-full bg-black/40 border-b border-purple-500 p-3 text-lg outline-none font-mono text-white">
-                    <div class="flex flex-col gap-2">
-                        <button onclick="generarQR('pago', 'banco')" class="w-full bg-purple-700 py-3 rounded-lg font-bold text-[9px] tracking-widest">GENERAR QR PAGO</button>
-                        <button onclick="abrirCamara('banco')" class="w-full bg-white/5 py-3 rounded-lg font-bold text-[8px]">ESCANEAR QR DE JUGADOR</button>
+                <h3 class="text-[10px] text-cyan-400 font-bold mb-4 block uppercase border-b border-white/5 pb-2">Gestión de Caja</h3>
+                
+                <div class="mb-6 bg-black/40 p-3 rounded border border-blue-500/30">
+                    <p class="text-[8px] text-blue-400 mb-2 uppercase tracking-widest">☁️ Transferencia Directa a Jugador</p>
+                    <select id="select-jugador-banco" class="w-full bg-transparent border-b border-blue-500/50 p-2 text-xs outline-none mb-2 font-mono text-white uppercase">
+                        <option value="">Seleccionar Jugador...</option>
+                    </select>
+                    <input id="monto-nube-banco" type="number" placeholder="$ Monto" class="w-full bg-transparent border-b border-blue-500/50 p-2 text-lg text-center outline-none mb-3 font-mono text-white">
+                    <div class="flex gap-2">
+                        <button onclick="transferirNube('pago', 'banco')" class="flex-1 bg-red-600/80 hover:bg-red-500 py-3 rounded-lg font-bold text-[8px] uppercase text-white transition-all shadow-lg">PAGAR</button>
+                        <button onclick="transferirNube('cobro', 'banco')" class="flex-1 bg-green-600/80 hover:bg-green-500 py-3 rounded-lg font-bold text-[8px] uppercase text-white transition-all shadow-lg">COBRAR</button>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-[8px] text-cyan-400 mb-1 uppercase tracking-widest">Generadores (QR)</p>
+                    <input id="monto-cobro-banco" type="number" placeholder="Ingreso Banco" class="w-full bg-black/40 border-b border-cyan-500 p-2 text-sm outline-none font-mono text-white mb-2">
+                    <button onclick="generarQR('cobro', 'banco')" class="w-full bg-cyan-700 hover:bg-cyan-600 py-3 rounded-lg font-bold text-[8px] tracking-widest mb-3 transition">GENERAR QR COBRO</button>
+                    
+                    <input id="monto-pago-banco" type="number" placeholder="Egreso Banco" class="w-full bg-black/40 border-b border-purple-500 p-2 text-sm outline-none font-mono text-white mb-2">
+                    <div class="flex gap-2">
+                        <button onclick="generarQR('pago', 'banco')" class="flex-1 bg-purple-700 hover:bg-purple-600 py-3 rounded-lg font-bold text-[8px] tracking-widest transition">QR PAGO</button>
+                        <button onclick="abrirCamara('banco')" class="flex-1 bg-white/5 hover:bg-white/10 py-3 rounded-lg font-bold text-[8px] transition">ESCANEAR</button>
                     </div>
                 </div>
             </section>
@@ -192,6 +228,25 @@
             </section>
         </div>
     </main>
+
+    <div id="modal-solicitud-banco" class="hidden fixed inset-0 bg-black/95 z-[110] flex flex-col items-center justify-center p-6 text-center">
+        <div class="glass p-8 max-w-sm w-full border-yellow-500/40 neon-gold">
+            <h2 class="text-xl font-black text-yellow-500 mb-2 uppercase tracking-widest">⚠️ Solicitud de Cobro</h2>
+            <p class="text-gray-300 text-xs mb-6">Un jugador está solicitando fondos del Banco.</p>
+            
+            <div class="bg-black/50 rounded-xl p-6 mb-6 border border-yellow-500/30">
+                <p class="text-sm text-gray-400 mb-1">JUGADOR</p>
+                <p id="banco-solicitante-nombre" class="text-2xl font-bold text-cyan-400 uppercase mb-4">NOMBRE</p>
+                <p class="text-sm text-gray-400 mb-1">MONTO SOLICITADO</p>
+                <p id="banco-solicitud-monto" class="text-4xl font-mono font-black text-green-400">$0.00</p>
+            </div>
+            
+            <div class="flex gap-4">
+                <button id="btn-aprobar-solicitud" class="flex-1 bg-green-600 hover:bg-green-500 py-4 rounded-xl font-bold text-xs uppercase text-white transition shadow-lg shadow-green-500/20">Aprobar</button>
+                <button id="btn-rechazar-solicitud" class="flex-1 bg-red-600 hover:bg-red-500 py-4 rounded-xl font-bold text-xs uppercase text-white transition shadow-lg shadow-red-500/20">Rechazar</button>
+            </div>
+        </div>
+    </div>
 
     <div id="modal-tarjeta-nfc" class="hidden fixed inset-0 bg-black/95 z-[90] flex flex-col items-center justify-center p-6 text-center">
         <h2 class="text-cyan-400 text-sm font-bold tracking-[0.3em] mb-8 uppercase">Terminal de Tarjeta</h2>
@@ -254,7 +309,6 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURACIÓN FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyDak7o3gvUmKsAe4qQMM1MO_LOqblhn6dE",
             authDomain: "monopolio-bank.firebaseapp.com",
@@ -267,7 +321,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- VARIABLES GLOBALES ---
         let miNombre = localStorage.getItem('miNombre') || '';
         let miFotoBase64 = localStorage.getItem('miFoto') || '';
         let saldoJugador = 0.00;
@@ -281,17 +334,18 @@
         let isNfcReading = false;
         let isNfcWriting = false;
         let lastNfcReadTime = 0; 
+        
+        // COLA SOLICITUDES AL BANCO
+        let colaSolicitudes = [];
+        let mostrandoSolicitud = false;
+        let idSolicitudActual = null;
 
-        // --- 2. INICIALIZACIÓN Y LOGIN CON FOTO ---
+        // --- INICIALIZACIÓN Y LOGIN CON FOTO ---
         window.onload = () => {
-            if (miNombre) {
-                iniciarApp();
-            } else {
-                document.getElementById('modal-lobby').classList.remove('hidden');
-            }
+            if (miNombre) iniciarApp();
+            else document.getElementById('modal-lobby').classList.remove('hidden');
         };
 
-        // Procesar foto de perfil en miniatura para que sea ligera en Firebase
         function procesarFoto(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -303,7 +357,7 @@
                     canvas.width = 100; canvas.height = 100;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, 100, 100);
-                    miFotoBase64 = canvas.toDataURL('image/jpeg', 0.7); // Compresión al 70%
+                    miFotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
                     
                     document.getElementById('preview-foto').src = miFotoBase64;
                     document.getElementById('preview-foto').classList.remove('hidden');
@@ -322,12 +376,14 @@
             localStorage.setItem('miNombre', miNombre);
             if(miFotoBase64) localStorage.setItem('miFoto', miFotoBase64);
             
-            db.ref('jugadores/' + miNombre).set({ 
-                nombre: miNombre, 
-                saldo: 0,
-                foto: miFotoBase64 
-            });
+            db.ref('jugadores/' + miNombre).set({ nombre: miNombre, saldo: 0, foto: miFotoBase64 });
             iniciarApp();
+        }
+
+        function cerrarSesionJugador() {
+            if(confirm("¿Seguro que deseas cerrar tu sesión actual? Tendrás que volver a ingresar tu nombre.")) {
+                localStorage.removeItem('miNombre'); localStorage.removeItem('miFoto'); window.location.reload(); 
+            }
         }
 
         function iniciarApp() {
@@ -349,15 +405,26 @@
 
             // Escuchar BANCO
             db.ref('banco/saldo').on('value', (snapshot) => {
-                if (!snapshot.exists()) {
-                    db.ref('banco/saldo').set(20580);
-                } else {
-                    saldoBanco = snapshot.val();
-                }
+                if (!snapshot.exists()) db.ref('banco/saldo').set(20580);
+                else saldoBanco = snapshot.val();
                 document.getElementById('saldo-banco').innerText = saldoBanco.toLocaleString();
             });
 
-            // Escuchar RANKING (Leaderboard)
+            // Escuchar SOLICITUDES AL BANCO (Para encolarlas)
+            db.ref('banco/solicitudes').on('child_added', (snapshot) => {
+                colaSolicitudes.push({ id: snapshot.key, ...snapshot.val() });
+                if (isAdminLoggedIn) procesarColaSolicitudes();
+            });
+            db.ref('banco/solicitudes').on('child_removed', (snapshot) => {
+                colaSolicitudes = colaSolicitudes.filter(s => s.id !== snapshot.key);
+                if (mostrandoSolicitud && idSolicitudActual === snapshot.key) {
+                    document.getElementById('modal-solicitud-banco').classList.add('hidden');
+                    mostrandoSolicitud = false;
+                    setTimeout(procesarColaSolicitudes, 500);
+                }
+            });
+
+            // Escuchar RANKING Y SELECTORES
             db.ref('jugadores').on('value', (snapshot) => {
                 const jugadores = snapshot.val() || {};
                 const arrJugadores = Object.values(jugadores).sort((a, b) => b.saldo - a.saldo);
@@ -365,10 +432,7 @@
                 document.getElementById('leaderboard-container').innerHTML = arrJugadores.map((j, index) => {
                     const isMe = j.nombre === miNombre;
                     const corona = index === 0 ? '👑 ' : '';
-                    const avatarHtml = j.foto 
-                        ? `<img src="${j.foto}" class="w-full h-full object-cover">` 
-                        : j.nombre.charAt(0);
-
+                    const avatarHtml = j.foto ? `<img src="${j.foto}" class="w-full h-full object-cover">` : j.nombre.charAt(0);
                     return `
                     <div class="flex items-center justify-between bg-black/40 p-2 rounded-lg border ${isMe ? 'border-cyan-500 bg-cyan-900/20' : 'border-white/5'}">
                         <div class="flex items-center gap-3">
@@ -378,6 +442,26 @@
                         <span class="text-xs font-mono font-bold ${isMe ? 'text-cyan-400' : 'text-green-400'}">$${j.saldo.toLocaleString()}</span>
                     </div>`;
                 }).join('');
+
+                const selectJugadorNube = document.getElementById('select-jugador-nube');
+                const selectBancoNube = document.getElementById('select-jugador-banco');
+                
+                const valJugador = selectJugadorNube.value;
+                const valBanco = selectBancoNube.value;
+
+                let optJugador = '<option value="">Seleccionar Destino...</option><option value="BANCO" class="font-bold text-yellow-400">🏦 BANCO CENTRAL</option>';
+                let optBanco = '<option value="">Seleccionar Jugador...</option>';
+
+                arrJugadores.forEach(j => {
+                    optBanco += `<option value="${j.nombre}">${j.nombre}</option>`;
+                    if (j.nombre !== miNombre) optJugador += `<option value="${j.nombre}">${j.nombre}</option>`;
+                });
+
+                selectJugadorNube.innerHTML = optJugador;
+                selectBancoNube.innerHTML = optBanco;
+
+                if(valJugador) selectJugadorNube.value = valJugador;
+                if(valBanco) selectBancoNube.value = valBanco;
             });
         }
 
@@ -389,16 +473,123 @@
             setTimeout(() => led.classList.remove('bg-white', 'shadow-[0_0_10px_#fff]'), 300);
         }
 
-        // --- 3. LÓGICA DE CÓDIGOS QR (SINCRONIZADA Y SIN DESCUENTO PREVIO) ---
+        // --- SISTEMA DE SOLICITUDES AL BANCO ---
+        function procesarColaSolicitudes() {
+            if (mostrandoSolicitud || colaSolicitudes.length === 0 || !isAdminLoggedIn) return;
+            mostrandoSolicitud = true;
+            const sol = colaSolicitudes[0];
+            idSolicitudActual = sol.id;
+            
+            document.getElementById('banco-solicitante-nombre').innerText = sol.jugador;
+            document.getElementById('banco-solicitud-monto').innerText = `$${sol.monto}`;
+            
+            document.getElementById('btn-aprobar-solicitud').onclick = () => resolverSolicitud(sol.id, sol.jugador, sol.monto, true);
+            document.getElementById('btn-rechazar-solicitud').onclick = () => resolverSolicitud(sol.id, sol.jugador, sol.monto, false);
+            
+            document.getElementById('modal-solicitud-banco').classList.remove('hidden');
+        }
+
+        function resolverSolicitud(id, jugador, monto, aprobada) {
+            if (aprobada) {
+                if (monto > saldoBanco) {
+                    alert("❌ El BANCO NO TIENE FONDOS SUFICIENTES para aprobar esta solicitud.");
+                    return; // No cierra el modal para que el banquero pueda recargar o rechazarla
+                }
+                actualizarBancoFirebase(saldoBanco - monto);
+                db.ref('jugadores/' + jugador + '/saldo').once('value').then(snap => {
+                    let s = snap.val() || 0;
+                    db.ref('jugadores/' + jugador).update({ saldo: s + monto });
+                });
+            }
+            
+            // Eliminar solicitud y procesar la siguiente
+            db.ref('banco/solicitudes/' + id).remove(); // Esto dispara el child_removed que cierra el modal y pasa a la sig.
+        }
+
+        // --- TRANSFERENCIAS DIRECTAS NUBE ---
+        async function transferirNube(tipo, entidad) {
+            const selectId = entidad === 'banco' ? 'select-jugador-banco' : 'select-jugador-nube';
+            const inputId = entidad === 'banco' ? 'monto-nube-banco' : 'monto-nube-jugador';
+            
+            const targetPlayer = document.getElementById(selectId).value;
+            const monto = parseFloat(document.getElementById(inputId).value);
+            
+            if (!targetPlayer) return alert("Selecciona a quién quieres transferirle.");
+            if (isNaN(monto) || monto <= 0) return alert("Ingresa un monto válido.");
+
+            if (entidad === 'banco') {
+                if (tipo === 'pago') { 
+                    if (monto > saldoBanco) return alert("BANCO SIN FONDOS.");
+                    db.ref('jugadores/' + targetPlayer + '/saldo').once('value').then(snap => {
+                        let targetSaldo = snap.val() || 0;
+                        db.ref('jugadores/' + targetPlayer).update({ saldo: targetSaldo + monto });
+                        actualizarBancoFirebase(saldoBanco - monto);
+                        alert(`✅ El Banco transfirió $${monto} a ${targetPlayer}.`);
+                        document.getElementById(inputId).value = '';
+                    });
+                } else if (tipo === 'cobro') { 
+                    db.ref('jugadores/' + targetPlayer + '/saldo').once('value').then(snap => {
+                        let targetSaldo = snap.val() || 0;
+                        if (targetSaldo < monto) return alert(`❌ ${targetPlayer} no tiene fondos suficientes.`);
+                        db.ref('jugadores/' + targetPlayer).update({ saldo: targetSaldo - monto });
+                        actualizarBancoFirebase(saldoBanco + monto);
+                        alert(`✅ El Banco le cobró $${monto} a ${targetPlayer}.`);
+                        document.getElementById(inputId).value = '';
+                    });
+                }
+            } else if (entidad === 'jugador') {
+                if (tipo === 'pago') { 
+                    if (monto > saldoJugador) return alert("No tienes saldo suficiente.");
+                    if (targetPlayer === 'BANCO') {
+                        actualizarBancoFirebase(saldoBanco + monto);
+                        actualizarSaldoFirebase(saldoJugador - monto);
+                        alert(`✅ Transferiste $${monto} al BANCO.`);
+                        document.getElementById(inputId).value = '';
+                    } else {
+                        db.ref('jugadores/' + targetPlayer + '/saldo').once('value').then(snap => {
+                            let targetSaldo = snap.val() || 0;
+                            db.ref('jugadores/' + targetPlayer).update({ saldo: targetSaldo + monto });
+                            actualizarSaldoFirebase(saldoJugador - monto);
+                            alert(`✅ Transferiste $${monto} a ${targetPlayer}.`);
+                            document.getElementById(inputId).value = '';
+                        });
+                    }
+                } else if (tipo === 'cobro') { 
+                    if (targetPlayer === 'BANCO') {
+                        // SOLICITUD AL BANCO EN LUGAR DE COBRO INMEDIATO
+                        db.ref('banco/solicitudes').push({
+                            jugador: miNombre,
+                            monto: monto,
+                            timestamp: Date.now()
+                        });
+                        alert(`⏳ Solicitud enviada al Banco. El banquero debe aprobarla para que recibas los $${monto}.`);
+                        document.getElementById(inputId).value = '';
+                    } else {
+                        if(!confirm(`¿Estás seguro de cobrarle $${monto} directamente a ${targetPlayer}?`)) return;
+                        db.ref('jugadores/' + targetPlayer + '/saldo').once('value').then(snap => {
+                            let targetSaldo = snap.val() || 0;
+                            if (targetSaldo < monto) return alert(`❌ ${targetPlayer} no tiene fondos suficientes.`);
+                            db.ref('jugadores/' + targetPlayer).update({ saldo: targetSaldo - monto });
+                            actualizarSaldoFirebase(saldoJugador + monto);
+                            alert(`✅ Le cobraste $${monto} a ${targetPlayer}.`);
+                            document.getElementById(inputId).value = '';
+                        });
+                    }
+                }
+            }
+        }
+
+        // --- SISTEMA QR ---
         function generarQR(tipo, entidad) {
             const monto = parseFloat(document.getElementById(`monto-${tipo}-${entidad}`).value);
             if (isNaN(monto) || monto <= 0) return alert("Ingrese un monto válido.");
             
-            // ATENCIÓN: El dinero NO se descuenta aquí. El QR es solo el "Billete/Factura".
-            // El descuento se hace en abrirCamara() cuando alguien lo escanea.
+            if (tipo === 'pago') {
+                if (entidad === 'jugador' && monto > saldoJugador) return alert("SALDO INSUFICIENTE para prometer este pago.");
+                if (entidad === 'banco' && monto > saldoBanco) return alert("BANCO SIN FONDOS para prometer este pago.");
+            }
 
             const emisor = entidad === 'banco' ? 'BANCO' : miNombre;
-            // Formato de Datos QR
             const qrText = `MNPLY-${tipo}-${monto}-${emisor}`;
             
             const qrContainer = document.getElementById('qrcode');
@@ -421,26 +612,22 @@
                         (text) => {
                             const parts = text.split('-');
                             if (parts[0] === 'MNPLY' && parts.length === 4) {
-                                const tipoQR = parts[1]; // Lo que el EMISOR quería hacer
+                                const tipoQR = parts[1]; 
                                 const monto = parseFloat(parts[2]);
                                 const emisorId = parts[3];
 
                                 if(!isNaN(monto)) {
-                                    cerrarCamara(); 
-                                    playSound();
+                                    cerrarCamara(); playSound();
 
-                                    // CASO 1: El QR es de un COBRO (El que lo creó quiere que LE PAGUEN)
                                     if (tipoQR === 'cobro') {
-                                        // Yo (escáner) voy a pagarle a él (emisor)
                                         if (entidadEscaneadora === 'jugador') {
                                             if (monto > saldoJugador) return alert("SALDO INSUFICIENTE para pagar esta factura.");
-                                            actualizarSaldoFirebase(saldoJugador - monto); // Me resto el dinero
+                                            actualizarSaldoFirebase(saldoJugador - monto); 
                                         } else if (entidadEscaneadora === 'banco') {
                                             if (monto > saldoBanco) return alert("BANCO SIN FONDOS");
-                                            actualizarBancoFirebase(saldoBanco - monto); // El banco se resta el dinero
+                                            actualizarBancoFirebase(saldoBanco - monto); 
                                         }
 
-                                        // Le entregamos el dinero al EMISOR
                                         if (emisorId === 'BANCO') {
                                             actualizarBancoFirebase(saldoBanco + monto);
                                         } else {
@@ -450,25 +637,18 @@
                                         }
                                         alert(`✅ ¡Transacción exitosa! Has pagado $${monto} a ${emisorId}.`);
                                     } 
-                                    
-                                    // CASO 2: El QR es de un PAGO (El que lo creó me está DANDO dinero)
                                     else if (tipoQR === 'pago') {
-                                        // Yo (escáner) voy a cobrarle a él (emisor)
-                                        
-                                        // Primero revisamos si el Emisor tiene dinero suficiente
                                         let refEmisor = emisorId === 'BANCO' ? db.ref('banco/saldo') : db.ref('jugadores/' + emisorId + '/saldo');
                                         refEmisor.once('value').then(snap => {
                                             let saldoEmisor = snap.val() || 0;
                                             if (saldoEmisor < monto) {
-                                                alert(`❌ Transacción cancelada. El emisor (${emisorId}) NO tiene saldo suficiente.`);
+                                                alert(`❌ Transacción cancelada. El emisor (${emisorId}) no tiene saldo suficiente.`);
                                                 return;
                                             }
 
-                                            // Si tiene fondos, se los restamos en la nube
                                             if (emisorId === 'BANCO') actualizarBancoFirebase(saldoEmisor - monto);
                                             else db.ref('jugadores/' + emisorId).update({saldo: saldoEmisor - monto});
 
-                                            // Y me los sumo a mi
                                             if (entidadEscaneadora === 'jugador') actualizarSaldoFirebase(saldoJugador + monto);
                                             else actualizarBancoFirebase(saldoBanco + monto);
                                             
@@ -483,14 +663,13 @@
             }).catch(err => { alert("❌ PERMISO CÁMARA DENEGADO."); });
         }
 
-        // --- 4. PROTOCOLO NFC (DOBLE LECTURA SEGURA PARA TARJETAS) ---
+        // --- SISTEMA NFC SEGURO ---
         async function verificarPermisoNFC() {
             if (!window.isSecureContext) { alert("🛑 Usa GitHub Pages (HTTPS) para el NFC."); return false; }
             if (!('NDEFReader' in window)) { alert("⚠️ Tu navegador no soporta NFC."); return false; }
             return true;
         }
 
-        // ESCRITURA BÁSICA PARA BANCO
         async function escribirNFCData(datos, btn, textoBase, successMsg, callbackDescuento) {
             if (!(await verificarPermisoNFC())) return false;
             if (isNfcWriting) return false;
@@ -508,15 +687,12 @@
             }
         }
 
-        // OPERACIÓN INTELIGENTE (LEER -> SUMAR/RESTAR -> GRABAR) PARA LA BLACK CARD
         async function operarTarjetaNFC(accion, monto) {
             if (!(await verificarPermisoNFC())) return;
             if (isNfcWriting || isNfcReading) return alert("Operación NFC en curso.");
             
             if (nfcWriteAbortController) nfcWriteAbortController.abort();
-            nfcWriteAbortController = new AbortController();
-            isNfcWriting = true;
-            
+            nfcWriteAbortController = new AbortController(); isNfcWriting = true;
             const status = document.getElementById('tarjeta-status');
 
             try {
@@ -528,24 +704,21 @@
                     if (!isNfcWriting) return;
                     
                     const decoder = new TextDecoder();
-                    let tagData = ""; 
-                    for (const record of message.records) tagData = decoder.decode(record.data);
+                    let tagData = ""; for (const record of message.records) tagData = decoder.decode(record.data);
                     
-                    let saldoActual = 0; 
-                    let tipoTarjeta = "VACIO";
+                    let saldoActual = 0; let tipoTarjeta = "VACIO";
                     
                     if (tagData) {
                         const parts = tagData.split(':');
                         if (parts[0] === 'MNPLY') {
                             tipoTarjeta = parts[1];
-                            // Aceptar fondos, o formatos viejos como PAGO o RECARGA
                             if (['FONDOS', 'PAGO', 'RECARGA', 'VACIO'].includes(tipoTarjeta)) {
                                 saldoActual = parseFloat(parts[2]) || 0;
                             } else if (tipoTarjeta === 'MULTA') {
                                 alert("❌ Esta es la tarjeta de MULTAS. Usa el botón correcto.");
                                 isNfcWriting = false; nfcWriteAbortController.abort(); status.innerText=""; return;
                             } else {
-                                if(!confirm(`Tarjeta de uso '${tipoTarjeta}'. ¿Sobreescribir como Tarjeta de FONDOS?`)) { 
+                                if(!confirm(`¿Sobreescribir tarjeta '${tipoTarjeta}' como Tarjeta de FONDOS?`)) { 
                                     isNfcWriting=false; nfcWriteAbortController.abort(); status.innerText=""; return; 
                                 }
                             }
@@ -553,58 +726,45 @@
                     }
 
                     let nuevoSaldo = 0;
-                    
-                    if (accion === 'AGREGAR') {
-                        nuevoSaldo = saldoActual + monto;
-                    } else if (accion === 'RETIRAR') {
+                    if (accion === 'AGREGAR') nuevoSaldo = saldoActual + monto;
+                    else if (accion === 'RETIRAR') {
                         if (monto > saldoActual) {
-                            alert(`❌ La tarjeta solo tiene $${saldoActual}. No puedes retirar $${monto}.`);
+                            alert(`❌ La tarjeta solo tiene $${saldoActual}.`);
                             isNfcWriting = false; nfcWriteAbortController.abort(); status.innerText=""; return;
                         }
                         nuevoSaldo = saldoActual - monto;
                     }
 
-                    // Paso Crítico: Grabar el nuevo saldo
                     try {
                         status.innerText = "GRABANDO... NO LA MUEVAS";
                         await ndef.write(`MNPLY:FONDOS:${nuevoSaldo}`);
                         
-                        // Solo si se graba físicamente con éxito, actualizamos la nube
                         if (accion === 'AGREGAR') {
                             actualizarSaldoFirebase(saldoJugador - monto);
-                            alert(`✅ $${monto} transferidos a la tarjeta. Nuevo saldo físico: $${nuevoSaldo}`);
+                            alert(`✅ $${monto} pasados a la tarjeta. Nuevo saldo físico: $${nuevoSaldo}`);
                         } else if (accion === 'RETIRAR') {
                             actualizarSaldoFirebase(saldoJugador + monto);
                             alert(`✅ $${monto} cobrados de la tarjeta. Nuevo saldo físico: $${nuevoSaldo}`);
                         }
                         
-                        playSound();
-                        cerrarModal('modal-tarjeta-nfc');
+                        playSound(); cerrarModal('modal-tarjeta-nfc');
                     } catch (e) { 
-                        alert("❌ Error: retiraste la tarjeta muy rápido. El dinero no fue movido."); 
-                    } finally { 
-                        isNfcWriting = false; 
-                        nfcWriteAbortController.abort(); 
-                        status.innerText = "";
-                    }
+                        alert("❌ Error: retiraste la tarjeta muy rápido. El dinero NO fue movido."); 
+                    } finally { isNfcWriting = false; nfcWriteAbortController.abort(); status.innerText = ""; }
                 };
                 ndef.onreadingerror = () => { alert("❌ Error de lectura magnética."); isNfcWriting = false; nfcWriteAbortController.abort(); status.innerText=""; };
             } catch (error) { isNfcWriting = false; status.innerText=""; }
         }
 
-        // --- BOTONES DE LA INTERFAZ DE TARJETAS ---
         async function procesarTarjetaJugador() {
             const pago = parseFloat(document.getElementById('input-nfc-pago').value);
             const cobro = parseFloat(document.getElementById('input-nfc-cobro').value);
-            
             if (!isNaN(pago) && pago > 0) {
-                if (pago > saldoJugador) return alert("Saldo insuficiente para meter este dinero a la tarjeta.");
+                if (pago > saldoJugador) return alert("Saldo insuficiente.");
                 await operarTarjetaNFC('AGREGAR', pago);
             } else if (!isNaN(cobro) && cobro > 0) {
                 await operarTarjetaNFC('RETIRAR', cobro);
-            } else {
-                alert("Ingresa un monto en Meter o Sacar dinero.");
-            }
+            } else alert("Ingresa un monto válido.");
         }
 
         async function recargarStickerBanco() {
@@ -613,7 +773,6 @@
             await escribirNFCData(`MNPLY:FONDOS:${m}`, document.getElementById('btn-nfc-write'), "GRABAR STICKER NUEVO", "Grabado.", () => { actualizarBancoFirebase(saldoBanco - m); document.getElementById('monto-nfc-banco').value=''; });
         }
 
-        // LECTURA DIRECTA DE STICKERS (BOTÓN GIGANTE) - Ahora estandarizado a MNPLY:FONDOS
         async function leerNFC() {
             const btn = document.getElementById('btn-nfc-read');
             if (!(await verificarPermisoNFC())) return;
@@ -621,8 +780,7 @@
             nfcAbortController = new AbortController(); isNfcReading = false; 
 
             try {
-                const ndef = new NDEFReader();
-                await ndef.scan({ signal: nfcAbortController.signal });
+                const ndef = new NDEFReader(); await ndef.scan({ signal: nfcAbortController.signal });
                 btn.innerText = "ACERCA LA TARJETA / STICKER..."; btn.classList.add('nfc-scanning', 'bg-blue-600/40');
 
                 ndef.onreading = async ({ message }) => {
@@ -645,14 +803,13 @@
                     } else if (accion === 'MULTA') { 
                         actualizarSaldoFirebase(saldoJugador + monto); msg = `✅ ¡PREMIO! Te llevaste el pozo de $${monto}.`; procesado = true; 
                     } else {
-                        alert("Formato de tarjeta antiguo no soportado para vaciado rápido."); isNfcReading=false; resetNFC(btn); return;
+                        alert("Formato de tarjeta no soportado."); isNfcReading=false; resetNFC(btn); return;
                     }
 
                     if (procesado) {
                         btn.innerText = "VACIANDO...";
                         try { const tm = new AbortController(); const id = setTimeout(()=>tm.abort(),1500); await ndef.write("MNPLY:VACIO:0", { signal: tm.signal }); clearTimeout(id); } catch (e) {}
                     }
-                    
                     playSound(); isNfcReading = false; resetNFC(btn); nfcAbortController.abort();
                     if (msg) setTimeout(() => alert(msg), 100);
                 };
@@ -672,7 +829,7 @@
                 ndef.onreading = async ({ message }) => {
                     const now = Date.now();
                     if (isNfcReading || (now - lastNfcReadTime < 3000)) return; 
-                    isNfcReading = true; lastNfcReadTime = now; btn.innerText = "PROCESANDO...";
+                    isNfcReading = true; lastNfcReadTime = now; btn.innerText = "PROCESANDO AL BANCO...";
 
                     const decoder = new TextDecoder();
                     let tagData = ""; for (const record of message.records) tagData = decoder.decode(record.data);
@@ -698,9 +855,8 @@
             } catch (error) { isNfcReading = false; resetNFCBanco(btn); }
         }
 
-        // PAGO DE MULTAS
         async function pagarMultaNFC() {
-            const montoStr = prompt("Ingrese el monto de la multa a pagar al centro:");
+            const montoStr = prompt("Ingrese la multa a pagar al centro:");
             if (!montoStr) return;
             const montoAPagar = parseFloat(montoStr);
             if (isNaN(montoAPagar) || montoAPagar <= 0) return alert("Monto inválido.");
@@ -747,21 +903,14 @@
         function playSound() { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.type = 'sine'; osc.frequency.value = 880; gain.gain.setValueAtTime(0.1, ctx.currentTime); osc.start(); osc.stop(ctx.currentTime + 0.1); } catch(e) {} }
         function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); }
         function abrirTarjetaNFC() { document.getElementById('modal-tarjeta-nfc').classList.remove('hidden'); document.getElementById('input-nfc-pago').value = ''; document.getElementById('input-nfc-cobro').value = ''; }
-        function cambiarVista(v) { document.getElementById('vista-jugador').classList.toggle('hidden', v === 'banco'); document.getElementById('vista-banco').classList.toggle('hidden', v === 'jugador'); }
+        function cambiarVista(v) { document.getElementById('vista-jugador').classList.toggle('hidden', v === 'banco'); document.getElementById('vista-banco').classList.toggle('hidden', v === 'jugador'); if (v === 'banco') procesarColaSolicitudes(); }
         function intentarAccesoBanco() { isAdminLoggedIn ? cambiarVista('banco') : document.getElementById('modal-login').classList.remove('hidden'); }
-        function verificarLogin() { const u = document.getElementById('login-user').value.toUpperCase(); const p = document.getElementById('login-pass').value; if (u === 'ADMIN' && p === '19921706') { isAdminLoggedIn = true; cerrarModal('modal-login'); cambiarVista('banco'); } else alert("ACCESO DENEGADO"); }
+        function verificarLogin() { const u = document.getElementById('login-user').value.toUpperCase(); const p = document.getElementById('login-pass').value; if (u === 'ADMIN' && p === '19921706') { isAdminLoggedIn = true; cerrarModal('modal-login'); cambiarVista('banco'); procesarColaSolicitudes(); } else alert("ACCESO DENEGADO"); }
         function cerrarSesionBanco() { isAdminLoggedIn = false; cambiarVista('jugador'); }
         function repartirInicial() { document.getElementById('monto-pago-banco').value = 1500; generarQR('pago', 'banco'); }
         function procesarHipoteca(acc) { const val = parseFloat(document.getElementById('select-propiedad').value); if(isNaN(val)||val<=0) return alert("Seleccione propiedad."); if (acc === 'hipotecar') { document.getElementById('monto-pago-banco').value = val; generarQR('pago', 'banco'); } else { document.getElementById('monto-cobro-banco').value = val + (val * 0.10); generarQR('cobro', 'banco'); } }
-        function confirmarResetBanco() { if(confirm("¿Seguro que deseas BORRAR a todos los jugadores y reiniciar el Banco a $20,580?")) { db.ref('jugadores').remove(); actualizarBancoFirebase(20580); alert("Partida reiniciada."); } }
-        
-        function cerrarSesionJugador() {
-            if(confirm("¿Seguro que deseas cerrar tu sesión actual? Tendrás que volver a ingresar tu nombre.")) {
-                localStorage.removeItem('miNombre');
-                localStorage.removeItem('miFoto');
-                window.location.reload(); 
-            }
-        }
+        function confirmarResetBanco() { if(confirm("¿Seguro que deseas BORRAR a todos los jugadores y reiniciar el Banco a $20,580?")) { db.ref('jugadores').remove(); db.ref('banco/solicitudes').remove(); actualizarBancoFirebase(20580); alert("Partida reiniciada."); } }
+        function confirmarReset() { alert("Para reiniciar usa el botón 'Reiniciar Partida' en la vista del Banco."); }
     </script>
 </body>
 </html>
